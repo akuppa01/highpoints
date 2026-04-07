@@ -1,9 +1,11 @@
+const { join } = require("path");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    join(__dirname, "app/**/*.{js,ts,jsx,tsx,mdx}"),
+    join(__dirname, "components/**/*.{js,ts,jsx,tsx,mdx}"),
+    join(__dirname, "pages/**/*.{js,ts,jsx,tsx,mdx}"),
   ],
   theme: {
     extend: {
@@ -32,16 +34,11 @@ module.exports = {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "hero-gradient":
-          "linear-gradient(to bottom, #080808 0%, transparent 30%, transparent 70%, #080808 100%)",
-        "card-gradient":
-          "linear-gradient(to top, rgba(8,8,8,0.95) 0%, rgba(8,8,8,0.4) 60%, transparent 100%)",
       },
       animation: {
         "fade-in": "fadeIn 0.8s ease-out forwards",
         "slide-up": "slideUp 0.7s ease-out forwards",
         "fade-up": "fadeUp 0.6s ease-out forwards",
-        pulse: "pulse 3s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
