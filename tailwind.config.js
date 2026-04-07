@@ -1,6 +1,5 @@
-import type { Config } from "tailwindcss";
-
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -42,7 +41,6 @@ export default {
         "fade-in": "fadeIn 0.8s ease-out forwards",
         "slide-up": "slideUp 0.7s ease-out forwards",
         "fade-up": "fadeUp 0.6s ease-out forwards",
-        "counter-spin": "counterSpin 0.3s ease-out",
         pulse: "pulse 3s ease-in-out infinite",
       },
       keyframes: {
@@ -65,4 +63,4 @@ export default {
     },
   },
   plugins: [],
-} satisfies Config;
+};

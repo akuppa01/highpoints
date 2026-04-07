@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Geist_Mono } from "next/font/google";
+import { Inter, Playfair_Display, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/nav";
 import { Footer } from "@/components/layout/footer";
@@ -16,7 +16,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const sourceMono = Source_Code_Pro({
   subsets: ["latin"],
   variable: "--font-geist-mono",
   display: "swap",
@@ -51,7 +51,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${playfair.variable} ${geistMono.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${sourceMono.variable}`}
     >
       <body className="bg-base font-sans text-text-primary min-h-screen flex flex-col antialiased">
         <Nav />
