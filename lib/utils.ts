@@ -1,7 +1,12 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { formatDistanceToNow, format } from "date-fns";
-import type { Difficulty, ProgressStats, PeakWithClimb } from "@/types";
+import type {
+  Difficulty,
+  ProgressStats,
+  PeakWithClimb,
+  RecordStatus,
+} from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -107,4 +112,42 @@ export function slugify(str: string): string {
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .trim();
+}
+
+export function statusLabel(status: RecordStatus): string {
+  const labels: Record<RecordStatus, string> = {
+    want_to_climb: "Want to climb",
+    planning: "Planning",
+    partially_climbed: "Partially climbed",
+    visited: "Visited",
+    completed: "Completed",
+    revisit: "Revisit someday",
+  };
+
+  return labels[status];
+}
+
+export function statusAccent(status: RecordStatus): string {
+  const accents: Record<RecordStatus, string> = {
+    want_to_climb: "text-stone-300 bg-stone-400/10 border-stone-400/20",
+    planning: "text-sky-300 bg-sky-400/10 border-sky-400/20",
+    partially_climbed: "text-amber-300 bg-amber-400/10 border-amber-400/20",
+    visited: "text-violet-300 bg-violet-400/10 border-violet-400/20",
+    completed: "text-summit bg-summit/10 border-summit/30",
+    revisit: "text-rose-300 bg-rose-400/10 border-rose-400/20",
+  };
+
+  return accents[status];
+}
+
+export function formatMaybeDistance(miles?: number | null) {
+  return typeof miles === "number" ? formatDistance(miles) : "—";
+}
+
+export function formatMaybeElevation(ft?: number | null) {
+  return typeof ft === "number" ? formatElevation(ft) : "—";
+}
+
+export function formatMaybeDuration(minutes?: number | null) {
+  return typeof minutes === "number" ? formatDuration(minutes) : "—";
 }

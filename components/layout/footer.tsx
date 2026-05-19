@@ -20,6 +20,9 @@ export function Footer() {
             <Link href="/map" className="hover:text-text-secondary transition-colors">
               Map
             </Link>
+            <Link href="/dashboard" className="hover:text-text-secondary transition-colors">
+              Journal
+            </Link>
             <a
               href="https://en.wikipedia.org/wiki/List_of_U.S._states_by_elevation"
               target="_blank"
@@ -31,7 +34,7 @@ export function Footer() {
           </div>
 
           <p className="text-xs text-text-muted font-mono">
-            Track the roof of every state.
+            Track the peaks that define your journey.
           </p>
         </div>
       </div>

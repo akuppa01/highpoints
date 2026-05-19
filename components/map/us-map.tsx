@@ -37,9 +37,14 @@ interface TooltipState {
 interface USMapProps {
   peaks: PeakWithClimb[];
   interactive?: boolean;
+  variant?: "progress" | "catalog";
 }
 
-export function USMap({ peaks, interactive = true }: USMapProps) {
+export function USMap({
+  peaks,
+  interactive = true,
+  variant = "progress",
+}: USMapProps) {
   const router = useRouter();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
@@ -85,6 +90,15 @@ export function USMap({ peaks, interactive = true }: USMapProps) {
               const stateCode = FIPS_TO_CODE[fips];
               const peak = peakByCode[stateCode];
               const completed = peak?.climb?.completed ?? false;
+              const fillDefault = variant === "catalog"
+                ? peak ? "#22312b" : "#1a1a1a"
+                : completed ? "#2d4a38" : "#1a1a1a";
+              const fillHover = variant === "catalog"
+                ? peak ? "#315244" : "#252525"
+                : completed ? "#4a7a5c" : "#252525";
+              const strokeHover = variant === "catalog"
+                ? peak ? "#5f9970" : "#2d2d2d"
+                : completed ? "#5f9970" : "#2d2d2d";
 
               return (
                 <Geography
@@ -95,14 +109,14 @@ export function USMap({ peaks, interactive = true }: USMapProps) {
                   onMouseLeave={() => setTooltip(null)}
                   style={{
                     default: {
-                      fill: completed ? "#2d4a38" : "#1a1a1a",
+                      fill: fillDefault,
                       stroke: "#0f0f0f",
                       strokeWidth: 0.5,
                       outline: "none",
                     },
                     hover: {
-                      fill: completed ? "#4a7a5c" : "#252525",
-                      stroke: completed ? "#5f9970" : "#2d2d2d",
+                      fill: fillHover,
+                      stroke: strokeHover,
                       strokeWidth: 0.75,
                       outline: "none",
                       cursor: interactive ? "pointer" : "default",
@@ -131,7 +145,7 @@ export function USMap({ peaks, interactive = true }: USMapProps) {
         >
           <div className="bg-surface border border-border rounded-lg px-3 py-2.5 shadow-xl min-w-[160px]">
             <div className="flex items-center gap-1.5 mb-1">
-              {tooltip.peak.climb?.completed && (
+              {variant === "progress" && tooltip.peak.climb?.completed && (
                 <div className="w-1.5 h-1.5 rounded-full bg-summit flex-shrink-0" />
               )}
               <span className="text-xs font-mono text-text-muted">
@@ -144,8 +158,10 @@ export function USMap({ peaks, interactive = true }: USMapProps) {
             <p className="text-xs text-text-secondary font-mono mt-0.5">
               {formatElevation(tooltip.peak.elevationFt)}
             </p>
-            {tooltip.peak.climb?.completed ? (
+            {variant === "progress" && tooltip.peak.climb?.completed ? (
               <p className="text-xs text-summit mt-1">Summited</p>
+            ) : variant === "catalog" ? (
+              <p className="text-xs text-text-muted mt-1">Open peak page</p>
             ) : (
               <p className="text-xs text-text-muted mt-1">Not yet climbed</p>
             )}

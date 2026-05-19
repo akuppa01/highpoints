@@ -1,10 +1,11 @@
 import type { Peak, Climb, PeakWithClimb } from "@/types";
+import { PEAK_IMAGE_OVERRIDES } from "@/lib/data/peak-image-overrides";
 
 // ---------------------------------------------------------------------------
 // All 50 US State Highpoints
 // ---------------------------------------------------------------------------
 
-export const ALL_PEAKS: Peak[] = [
+const BASE_PEAKS: Peak[] = [
   {
     id: "al",
     slug: "cheaha-mountain",
@@ -971,6 +972,11 @@ export const ALL_PEAKS: Peak[] = [
   },
 ];
 
+export const ALL_PEAKS: Peak[] = BASE_PEAKS.map((peak) => ({
+  ...peak,
+  heroImageUrl: PEAK_IMAGE_OVERRIDES[peak.id] ?? peak.heroImageUrl,
+}));
+
 // ---------------------------------------------------------------------------
 // Detailed climb data for completed peaks
 // ---------------------------------------------------------------------------
@@ -1244,6 +1250,16 @@ export function getPeakBySlug(slug: string): PeakWithClimb | undefined {
   const peak = ALL_PEAKS.find((p) => p.slug === slug);
   if (!peak) return undefined;
   return { ...peak, climb: SAMPLE_CLIMBS[peak.id] };
+}
+
+export function getPeakWithClimbById(id?: string | null): PeakWithClimb | null {
+  if (!id) return null;
+  const peak = ALL_PEAKS.find((entry) => entry.id === id);
+  if (!peak) return null;
+  return {
+    ...peak,
+    climb: SAMPLE_CLIMBS[peak.id],
+  };
 }
 
 export function getFeaturedPeaks(): PeakWithClimb[] {

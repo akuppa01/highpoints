@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 export async function createClient() {
   const cookieStore = await cookies();
+  type CookieOptions = Parameters<typeof cookieStore.set>[2];
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,11 +13,10 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: object }[]) {
+        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              cookieStore.set(name, value, options as any)
+              cookieStore.set(name, value, options)
             );
           } catch {
             // setAll called from Server Component — cookies are read-only

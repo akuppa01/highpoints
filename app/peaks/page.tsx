@@ -51,7 +51,7 @@ export default function PeaksPage() {
       {/* Page header */}
       <div className="border-b border-border bg-surface">
         <div className="container-wide py-10">
-          <span className="text-label block mb-3">All Peaks</span>
+          <span className="text-label block mb-3">Canonical Peaks</span>
           <div className="flex flex-col sm:flex-row sm:items-end gap-4 justify-between">
             <div>
               <h1 className="font-display text-4xl md:text-5xl text-text-primary tracking-tight">
@@ -61,7 +61,7 @@ export default function PeaksPage() {
                 <span className="text-text-primary font-mono">{completedCount}</span>
                 {" "}summited ·{" "}
                 <span className="text-text-muted font-mono">{50 - completedCount}</span>
-                {" "}remaining
+                {" "}remaining in the classic list
               </p>
             </div>
 

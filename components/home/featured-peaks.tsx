@@ -1,136 +1,130 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { cn, formatElevation, formatDate } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
+import { SummitImage } from "@/components/media/summit-image";
 import { getFeaturedPeaks } from "@/lib/data/peaks-data";
+import { cn, formatDate, formatElevation } from "@/lib/utils";
 import type { PeakWithClimb } from "@/types";
 
 function FeaturedCard({
   peak,
   featured = false,
+  showCompletion = false,
 }: {
   peak: PeakWithClimb;
   featured?: boolean;
+  showCompletion?: boolean;
 }) {
   return (
     <Link
       href={`/peaks/${peak.slug}`}
       className={cn(
-        "group relative flex flex-col justify-end overflow-hidden rounded-2xl",
-        "border border-border hover:border-border-light",
-        "transition-all duration-500",
-        featured ? "min-h-[420px] md:min-h-[520px]" : "min-h-[280px] md:min-h-[340px]"
+        "group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-2xl border border-border transition-all duration-500 hover:border-border-light",
+        featured ? "md:min-h-[520px]" : "md:min-h-[340px]"
       )}
     >
-      {/* Background image */}
-      {peak.heroImageUrl && (
+      {peak.heroImageUrl ? (
         <div className="absolute inset-0">
-          <Image
+          <SummitImage
             src={peak.heroImageUrl}
             alt={peak.name}
-            fill
-            className="object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
+            className="transition-transform duration-700 ease-out group-hover:scale-105"
             sizes={featured ? "(max-width: 768px) 100vw, 60vw" : "(max-width: 768px) 100vw, 40vw"}
           />
-          {/* Gradient overlay */}
           <div className="absolute inset-0 img-overlay" />
-          {/* Subtle top vignette */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />
         </div>
-      )}
+      ) : null}
 
-      {/* Content */}
-      <div className="relative p-5 md:p-6 space-y-3">
-        {/* State code + completion badge */}
+      <div className="relative space-y-3 p-5 md:p-6">
         <div className="flex items-center justify-between">
           <span className="text-label">{peak.state}</span>
-          {peak.climb?.completed && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-summit/20 border border-summit/30">
-              <CheckCircle2 className="w-3 h-3 text-summit" />
+          {showCompletion && peak.climb?.completed ? (
+            <div className="flex items-center gap-1.5 rounded-full border border-summit/30 bg-summit/20 px-2 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-summit" />
               <span className="text-xs font-mono text-summit">
-                {formatDate(peak.climb.completedDate!)}
+                {formatDate(peak.climb.completedDate ?? "")}
               </span>
             </div>
-          )}
+          ) : null}
         </div>
 
         <div>
           <h3
             className={cn(
-              "font-display text-text-primary tracking-tight leading-tight",
+              "font-display leading-tight tracking-tight text-text-primary",
               featured ? "text-3xl md:text-4xl" : "text-xl md:text-2xl"
             )}
           >
             {peak.name}
           </h3>
-          <p className="text-sm text-text-secondary mt-1 font-mono">
+          <p className="mt-1 font-mono text-sm text-text-secondary">
             {formatElevation(peak.elevationFt)} elevation
           </p>
         </div>
 
-        {featured && peak.shortDescription && (
-          <p className="text-sm text-text-secondary leading-relaxed clamp-2">
+        {featured && peak.shortDescription ? (
+          <p className="clamp-2 text-sm leading-relaxed text-text-secondary">
             {peak.shortDescription}
           </p>
-        )}
+        ) : null}
 
-        {/* Arrow indicator */}
-        <div className="flex items-center gap-1 text-text-muted group-hover:text-summit transition-colors duration-200">
+        <div className="flex items-center gap-1 text-text-muted transition-colors duration-200 group-hover:text-summit">
           <span className="text-xs font-mono">View peak</span>
-          <ArrowRight className="w-3 h-3 translate-x-0 group-hover:translate-x-0.5 transition-transform duration-200" />
+          <ArrowRight className="h-3 w-3 translate-x-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>
   );
 }
 
-export function FeaturedPeaks() {
+export function FeaturedPeaks({ showCompletion = false }: { showCompletion?: boolean }) {
   const featured = getFeaturedPeaks();
-  // First peak gets the big card, rest are smaller
-  const [hero, ...rest] = featured.filter((p) => p.heroImageUrl).slice(0, 5);
+  const [hero, ...rest] = featured.filter((peak) => peak.heroImageUrl).slice(0, 5);
 
   return (
     <section className="section-padding">
       <div className="container-wide">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-10">
+        <div className="mb-10 flex items-end justify-between">
           <div>
-            <span className="text-label block mb-2">Featured Summits</span>
-            <h2 className="font-display text-3xl md:text-4xl text-text-primary tracking-tight">
-              The peaks that define the journey.
+            <span className="text-label mb-2 block">Featured Summits</span>
+            <h2 className="font-display text-3xl tracking-tight text-text-primary md:text-4xl">
+              A few iconic peaks to start with.
             </h2>
+            <p className="mt-3 max-w-2xl text-text-secondary">
+              Browse the canonical list like a field guide: classic mountains,
+              clean visuals, and a quick sense of what makes each summit memorable.
+            </p>
           </div>
           <Link
             href="/peaks"
-            className="hidden sm:flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
+            className="hidden items-center gap-2 text-sm text-text-muted transition-colors hover:text-text-secondary sm:flex"
           >
-            All {50} peaks
-            <ArrowRight className="w-3.5 h-3.5" />
+            All 50 peaks
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
-        {/* Grid layout: big hero left + 2x2 right */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {hero && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+          {hero ? (
             <div className="md:col-span-3">
-              <FeaturedCard peak={hero} featured />
+              <FeaturedCard peak={hero} featured showCompletion={showCompletion} />
             </div>
-          )}
-          <div className="md:col-span-2 grid grid-cols-1 gap-4">
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-4 md:col-span-2">
             {rest.slice(0, 2).map((peak) => (
-              <FeaturedCard key={peak.id} peak={peak} />
+              <FeaturedCard key={peak.id} peak={peak} showCompletion={showCompletion} />
             ))}
           </div>
         </div>
 
-        {/* Second row */}
-        {rest.length > 2 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        {rest.length > 2 ? (
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
             {rest.slice(2, 5).map((peak) => (
-              <FeaturedCard key={peak.id} peak={peak} />
+              <FeaturedCard key={peak.id} peak={peak} showCompletion={showCompletion} />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );
