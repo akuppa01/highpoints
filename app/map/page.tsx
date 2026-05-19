@@ -50,7 +50,7 @@ export default function MapPage() {
           <div className="lg:col-span-3">
             <div className="relative rounded-2xl border border-border bg-surface overflow-hidden">
               {/* Legend */}
-              <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-base/90 backdrop-blur-sm border border-border rounded-xl p-3">
+              <div className="absolute top-4 right-4 z-10 hidden md:flex flex-col gap-2 bg-base/90 backdrop-blur-sm border border-border rounded-xl p-3">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-sm bg-[#22312b] border border-summit-light/50" />
                   <span className="text-xs font-mono text-text-secondary">
@@ -67,6 +67,18 @@ export default function MapPage() {
 
               <div className="p-4 md:p-8">
                 <USMap peaks={filteredPeaks} interactive variant="catalog" />
+              </div>
+              <div className="border-t border-border p-4 md:hidden">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-[#22312b] border border-summit-light/50" />
+                    <span className="text-xs font-mono text-text-secondary">Canonical peak page</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-[#1a1a1a] border border-border-light" />
+                    <span className="text-xs font-mono text-text-secondary">Outside focus</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

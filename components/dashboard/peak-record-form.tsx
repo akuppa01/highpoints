@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { deleteMediaAction, savePeakRecordAction } from "@/app/dashboard/actions";
+import { RecordActionBar } from "@/components/dashboard/record-action-bar";
+import { FormSubmitButton } from "@/components/ui/form-submit-button";
 import { getPeakOptions } from "@/lib/data/records";
 import { RECORD_STATUS_OPTIONS } from "@/lib/records-ui";
 import { statusAccent } from "@/lib/utils";
@@ -102,6 +104,8 @@ export function PeakRecordForm({
       <input type="hidden" name="slug" value={record.slug} />
       <input type="hidden" name="mode" value={mode} />
 
+      <RecordActionBar isPublished={record.isPublished} mode={mode} />
+
       <section className="card-base space-y-6 p-6 md:p-7">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
@@ -162,9 +166,10 @@ export function PeakRecordForm({
 
         <div className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
           <div className="rounded-2xl border border-border bg-card/70 p-4">
-            <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Fast stats</p>
+            <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Quick climb summary</p>
             <p className="mt-2 text-sm text-text-secondary">
-              Leave these blank and Summit can borrow canonical route defaults for known highpoints.
+              Add your own mileage, gain, and time if you know them. If this is one of the built-in highpoints,
+              you can also tell Summit to use the standard route defaults for you.
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <Input label="Distance (mi)" name="distance_miles" defaultValue={record.distanceMiles} type="number" />
@@ -176,13 +181,23 @@ export function PeakRecordForm({
           <div className="rounded-2xl border border-border bg-card/70 p-4 space-y-4">
             <Checkbox
               name="use_canonical_defaults"
-              label="Use canonical route defaults"
+              label="Use Summit defaults for route + stats"
               defaultChecked={isCreate}
-              description="For known state highpoints, auto-fill route name, distance, gain, and time when you leave them blank."
+              description="For canonical state highpoints, Summit will replace route name, distance, elevation gain, and time with the standard climb defaults when you save."
             />
-            <button type="submit" className="btn-primary w-full justify-center">
-              {isCreate ? "Save quick log" : "Save basics"}
-            </button>
+            <p className="rounded-xl border border-dashed border-border px-3 py-3 text-xs leading-relaxed text-text-muted">
+              Best for fast logging. If you already entered your own numbers and check this box, the Summit defaults will win.
+            </p>
+            <div className="space-y-2">
+              <FormSubmitButton
+                idleLabel={isCreate ? "Save quick log" : "Save basics to journal"}
+                pendingLabel={isCreate ? "Saving quick log..." : "Saving basics..."}
+                fullWidth
+              />
+              <p className="text-[11px] text-text-muted">
+                Quick save keeps the current publish state. Use the action bar above to force draft or publish.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -192,8 +207,11 @@ export function PeakRecordForm({
           <div>
             <span className="text-label mb-2 block">Advanced details</span>
             <h3 className="font-display text-2xl tracking-tight text-text-primary">
-              Story, route, media, and public sharing controls
+              Add the story people will actually care about
             </h3>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
+              Keep this part lightweight: a short story, a few standout photos, and only the extra details that make the climb memorable.
+            </p>
           </div>
           <span className="rounded-full border border-border px-3 py-1.5 text-xs font-mono text-text-muted group-open:text-text-primary">
             Expand
@@ -202,50 +220,28 @@ export function PeakRecordForm({
 
         <div className="mt-6 space-y-8">
           <section className="space-y-6">
-            <div className="grid gap-5 md:grid-cols-2">
-              <Input label="Route name" name="route_name" defaultValue={record.routeName} placeholder="Mount Whitney Trail" />
-              <Input label="Companions" name="companions" defaultValue={record.companions} placeholder="Alex, Sam, trail dog included" />
-              <Input label="Weather" name="weather" defaultValue={record.weather} placeholder="Cold sunrise, calm summit" />
-              <label className="block space-y-2">
-                <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Difficulty</span>
-                <select
-                  name="difficulty"
-                  defaultValue={record.difficulty ?? ""}
-                  className="w-full rounded-xl border border-border bg-card px-4 py-3 text-text-primary focus:border-border-light focus:outline-none"
-                >
-                  <option value="">Not set</option>
-                  <option value="easy">Easy</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="hard">Hard</option>
-                  <option value="technical">Technical</option>
-                </select>
-              </label>
-              <Input label="Hero photo URL" name="hero_photo_url" defaultValue={record.heroPhotoUrl} placeholder="Optional cover image" />
-              <Input label="Latitude" name="latitude" defaultValue={record.latitude} type="number" />
-              <Input label="Longitude" name="longitude" defaultValue={record.longitude} type="number" />
+            <div>
+              <span className="text-label mb-2 block">Story</span>
+              <h3 className="font-display text-2xl tracking-tight text-text-primary">A short, honest climb recap</h3>
             </div>
-
-            <TextArea label="Private field notes" name="notes" defaultValue={record.notes} placeholder="What happened on the mountain?" rows={5} />
+            <TextArea label="Public story" name="public_notes" defaultValue={record.publicNotes} placeholder="What stood out about this climb? Keep it simple and human." rows={5} />
             <div className="grid gap-5 md:grid-cols-2">
-              <TextArea label="Public notes" name="public_notes" defaultValue={record.publicNotes} placeholder="What should appear on the public page?" />
-              <TextArea label="Private notes" name="private_notes" defaultValue={record.privateNotes} placeholder="Personal reflections that never publish." />
-              <TextArea label="Anecdotes" name="anecdotes" defaultValue={record.anecdotes} placeholder="Little story fragments and moments." />
-              <TextArea label="Special memories" name="special_memories" defaultValue={record.specialMemories} placeholder="The emotional center of the day." />
-              <TextArea label="Favorite moment" name="favorite_moment" defaultValue={record.favoriteMoment} placeholder="That one moment you'd frame forever." />
-              <TextArea label="Lessons learned" name="lessons_learned" defaultValue={record.lessonsLearned} placeholder="Gear, pacing, weather, headspace." />
-              <TextArea label="Gear notes" name="gear_notes" defaultValue={record.gearNotes} placeholder="What worked, what failed, what to bring next time." />
-              <TextArea label="Audio transcript" name="audio_transcript" defaultValue={record.audioTranscript} placeholder="Optional voice memo transcript or spoken recap." />
+              <TextArea label="Favorite moment" name="favorite_moment" defaultValue={record.favoriteMoment} placeholder="The one moment you’d tell a friend about first." rows={3} />
+              <TextArea label="Lessons learned" name="lessons_learned" defaultValue={record.lessonsLearned} placeholder="Anything you'd do differently next time?" rows={3} />
+              <Input label="Companions" name="companions" defaultValue={record.companions} placeholder="Who was with you?" />
+              <Input label="Weather" name="weather" defaultValue={record.weather} placeholder="What were the conditions like?" />
             </div>
+            <TextArea label="Private notes" name="private_notes" defaultValue={record.privateNotes} placeholder="Anything just for you?" rows={3} />
           </section>
 
           <section className="space-y-6">
             <div>
               <span className="text-label mb-2 block">Media</span>
-              <h3 className="font-display text-2xl tracking-tight text-text-primary">Photos, albums, and graceful fallbacks</h3>
+              <h3 className="font-display text-2xl tracking-tight text-text-primary">Top photos first</h3>
             </div>
 
             <label className="block space-y-2">
-              <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Upload photos</span>
+              <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Upload up to 5 photos</span>
               <input
                 type="file"
                 name="photos"
@@ -254,7 +250,7 @@ export function PeakRecordForm({
                 className="w-full rounded-xl border border-dashed border-border bg-card px-4 py-4 text-sm text-text-secondary"
               />
               <p className="text-xs text-text-muted">
-                If Supabase Storage is configured, uploads become part of the climb record. Otherwise the form still supports external links and cover imagery.
+                Use your best 1 to 5 images here for the main story carousel. Broader albums can live below as external links.
               </p>
             </label>
 
@@ -263,8 +259,11 @@ export function PeakRecordForm({
               name="external_album_links"
               defaultValue={record.externalAlbumLinks.join("\n")}
               placeholder="One iCloud / Google Photos / gallery link per line"
-              rows={4}
+              rows={3}
             />
+            <p className="text-xs leading-relaxed text-text-muted">
+              Summit currently shows these as elegant album cards and outbound links. Full authenticated album importing is future-ready, but not automatic yet.
+            </p>
 
             {record.media && record.media.length > 0 ? (
               <div className="space-y-3">
@@ -300,22 +299,55 @@ export function PeakRecordForm({
 
           <section className="space-y-6">
             <div>
-              <span className="text-label mb-2 block">Strava</span>
-              <h3 className="font-display text-2xl tracking-tight text-text-primary">Phase-one link paste, metadata, and future OAuth hooks</h3>
+              <span className="text-label mb-2 block">Activity link</span>
+              <h3 className="font-display text-2xl tracking-tight text-text-primary">Connect Strava if you want the receipts</h3>
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
               <Input label="Strava activity URL" name="strava_activity_url" defaultValue={record.strava.activityUrl} placeholder="https://www.strava.com/activities/..." />
               <Input label="Activity title" name="strava_activity_title" defaultValue={record.strava.activityTitle} placeholder="Whitney sunrise push" />
               <Input label="Activity date" name="strava_activity_date" defaultValue={record.strava.activityDate} type="date" />
-              <Input label="Source" name="strava_source" defaultValue={record.strava.source} placeholder="manual" />
-              <Input label="Distance (mi)" name="strava_distance_miles" defaultValue={record.strava.distanceMiles} type="number" />
-              <Input label="Elevation gain (ft)" name="strava_elevation_gain_ft" defaultValue={record.strava.elevationGainFt} type="number" />
               <Input label="Moving time (minutes)" name="strava_moving_time_minutes" defaultValue={record.strava.movingTimeMinutes} type="number" />
               <Input label="Pace text" name="strava_pace_text" defaultValue={record.strava.paceText} placeholder="22:15/mi" />
-              <Input label="Route map image URL" name="strava_route_map_image_url" defaultValue={record.strava.routeMapImageUrl} placeholder="Optional static thumbnail URL" />
             </div>
           </section>
+
+          <details className="rounded-2xl border border-border bg-card/50 p-5">
+            <summary className="cursor-pointer list-none text-sm font-medium text-text-primary">
+              More fields
+            </summary>
+            <div className="mt-5 space-y-6">
+              <div className="grid gap-5 md:grid-cols-2">
+                <Input label="Route name" name="route_name" defaultValue={record.routeName} placeholder="Mount Whitney Trail" />
+                <label className="block space-y-2">
+                  <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Difficulty</span>
+                  <select
+                    name="difficulty"
+                    defaultValue={record.difficulty ?? ""}
+                    className="w-full rounded-xl border border-border bg-card px-4 py-3 text-text-primary focus:border-border-light focus:outline-none"
+                  >
+                    <option value="">Not set</option>
+                    <option value="easy">Easy</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="hard">Hard</option>
+                    <option value="technical">Technical</option>
+                  </select>
+                </label>
+                <TextArea label="Private field notes" name="notes" defaultValue={record.notes} placeholder="Detailed notes from the day." rows={4} />
+                <TextArea label="Gear notes" name="gear_notes" defaultValue={record.gearNotes} placeholder="What worked, what failed, what to bring next time." rows={4} />
+                <TextArea label="Anecdotes" name="anecdotes" defaultValue={record.anecdotes} placeholder="Little fragments worth remembering." rows={4} />
+                <TextArea label="Special memories" name="special_memories" defaultValue={record.specialMemories} placeholder="The deeper emotional center of the day." rows={4} />
+                <TextArea label="Audio transcript" name="audio_transcript" defaultValue={record.audioTranscript} placeholder="Optional voice memo transcript." rows={4} />
+                <Input label="Hero photo URL" name="hero_photo_url" defaultValue={record.heroPhotoUrl} placeholder="Optional cover image" />
+                <Input label="Latitude" name="latitude" defaultValue={record.latitude} type="number" />
+                <Input label="Longitude" name="longitude" defaultValue={record.longitude} type="number" />
+                <Input label="Strava distance (mi)" name="strava_distance_miles" defaultValue={record.strava.distanceMiles} type="number" />
+                <Input label="Strava elevation gain (ft)" name="strava_elevation_gain_ft" defaultValue={record.strava.elevationGainFt} type="number" />
+                <Input label="Source" name="strava_source" defaultValue={record.strava.source} placeholder="manual" />
+                <Input label="Route map image URL" name="strava_route_map_image_url" defaultValue={record.strava.routeMapImageUrl} placeholder="Optional static thumbnail URL" />
+              </div>
+            </div>
+          </details>
 
           <section className="space-y-6">
             <div>
@@ -356,9 +388,10 @@ export function PeakRecordForm({
               />
             </div>
 
-            <button type="submit" className="btn-primary">
-              {isCreate ? "Save full record" : "Save and update public page"}
-            </button>
+            <FormSubmitButton
+              idleLabel={isCreate ? "Save full record" : "Save and update public page"}
+              pendingLabel={isCreate ? "Saving record..." : "Updating story..."}
+            />
           </section>
         </div>
       </details>

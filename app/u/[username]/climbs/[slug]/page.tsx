@@ -15,7 +15,9 @@ import {
 import { ClimbRecapCard } from "@/components/public/share-cards";
 import { JourneyMap } from "@/components/public/journey-map";
 import { ShareCopyButton } from "@/components/public/share-copy-button";
+import { IntentLink } from "@/components/ui/intent-link";
 import { getPublishedRecord } from "@/lib/data/records";
+import { getPeakWithClimbById } from "@/lib/data/peaks-data";
 import { getBaseUrl } from "@/lib/supabase/config";
 import {
   formatDate,
@@ -63,6 +65,14 @@ export default async function PublicClimbPage({
 
   const publicUrl = `${getBaseUrl()}/u/${username}/climbs/${slug}`;
   const heroImage = record.media.find((item) => item.isHighlight)?.mediaUrl ?? record.heroPhotoUrl;
+  const featuredMedia = record.media.slice(0, 5);
+  const canonicalPeak = getPeakWithClimbById(record.peak?.id);
+  const canonicalRoute = canonicalPeak?.climb;
+  const storyLead =
+    record.publicNotes ||
+    record.specialMemories ||
+    canonicalPeak?.shortDescription ||
+    "A personal climbing record with route stats, photos, and mountain context.";
 
   return (
     <article className="pt-14 min-h-screen">
@@ -70,13 +80,15 @@ export default async function PublicClimbPage({
         <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-summit/15 via-transparent to-summit-amber/10" />
         <div className="container-wide relative py-8 md:py-12">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <Link
+            <IntentLink
               href={`/u/${username}`}
+              hoverPrefetch
+              pendingHint
               className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-text-secondary transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to @{username}
-            </Link>
+            </IntentLink>
             <ShareCopyButton url={publicUrl} />
           </div>
 
@@ -99,6 +111,9 @@ export default async function PublicClimbPage({
                 </h1>
                 <p className="text-text-secondary mt-4 max-w-2xl leading-relaxed">
                   {record.locationLabel || [record.state, record.country].filter(Boolean).join(", ")}
+                </p>
+                <p className="text-text-secondary/90 mt-4 max-w-2xl leading-relaxed">
+                  {storyLead}
                 </p>
               </div>
 
@@ -205,6 +220,54 @@ export default async function PublicClimbPage({
               </section>
             )}
 
+            {(canonicalPeak?.longDescription || canonicalPeak?.shortDescription) && (
+              <section className="card-base p-6 md:p-8 space-y-5">
+                <div>
+                  <span className="text-label block mb-2">About the mountain</span>
+                  <h2 className="font-display text-3xl text-text-primary tracking-tight">
+                    Canonical peak context
+                  </h2>
+                </div>
+                {canonicalPeak?.longDescription ? (
+                  <div className="space-y-4">
+                    {canonicalPeak.longDescription.split("\n\n").map((paragraph, index) => (
+                      <p
+                        key={index}
+                        className={index === 0 ? "text-base md:text-lg leading-relaxed text-text-secondary" : "text-sm md:text-base leading-relaxed text-text-muted"}
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-base md:text-lg leading-relaxed text-text-secondary">
+                    {canonicalPeak?.shortDescription}
+                  </p>
+                )}
+              </section>
+            )}
+
+            {(record.routeName || canonicalRoute?.routeName) && (
+              <section className="card-base p-6 md:p-8 space-y-5">
+                <div>
+                  <span className="text-label block mb-2">Route</span>
+                  <h2 className="font-display text-3xl text-text-primary tracking-tight">
+                    {record.routeName ? "Chosen route" : "Default route guidance"}
+                  </h2>
+                </div>
+                <div className="rounded-2xl border border-border bg-card px-5 py-4">
+                  <p className="text-lg text-text-primary">
+                    {record.routeName || canonicalRoute?.routeName}
+                  </p>
+                  {canonicalRoute?.routeDescription ? (
+                    <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+                      {canonicalRoute.routeDescription}
+                    </p>
+                  ) : null}
+                </div>
+              </section>
+            )}
+
             {(record.favoriteMoment || record.lessonsLearned || record.gearNotes) && (
               <section className="grid gap-4 md:grid-cols-3">
                 {record.favoriteMoment && (
@@ -234,7 +297,7 @@ export default async function PublicClimbPage({
               </section>
             )}
 
-            {record.media.length > 0 && (
+            {featuredMedia.length > 0 && (
               <section className="space-y-4">
                 <div>
                   <span className="text-label block mb-2">Photos</span>
@@ -242,19 +305,21 @@ export default async function PublicClimbPage({
                     Highlights from the day
                   </h2>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {record.media.map((media) => (
+                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
+                  {featuredMedia.map((media, index) => (
                     <figure
                       key={media.id}
-                      className="overflow-hidden rounded-[28px] border border-border bg-card"
+                      className={`snap-start flex-shrink-0 overflow-hidden rounded-[28px] border border-border bg-card ${
+                        index === 0 ? "w-[82%] md:w-[68%]" : "w-[72%] md:w-[42%]"
+                      }`}
                     >
-                      <div className="relative min-h-[240px]">
+                      <div className="relative min-h-[260px] md:min-h-[340px]">
                         <Image
                           src={media.mediaUrl}
                           alt={media.caption || record.peakName}
                           fill
                           className="object-cover"
-                          sizes="(max-width: 768px) 100vw, 50vw"
+                          sizes="(max-width: 768px) 85vw, 45vw"
                         />
                       </div>
                       {media.caption && (
@@ -267,9 +332,80 @@ export default async function PublicClimbPage({
                 </div>
               </section>
             )}
+
+            {record.externalAlbumLinks.length > 0 && (
+              <section className="space-y-4">
+                <div>
+                  <span className="text-label block mb-2">Albums</span>
+                  <h2 className="font-display text-3xl text-text-primary tracking-tight">
+                    The rest of the photo roll
+                  </h2>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {record.externalAlbumLinks.map((link, index) => {
+                    let host = "External album";
+                    try {
+                      host = new URL(link).hostname.replace(/^www\./, "");
+                    } catch {}
+
+                    return (
+                      <IntentLink
+                        key={`${link}-${index}`}
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="card-base p-5 hover:bg-card-hover"
+                      >
+                        <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted mb-3">
+                          {host}
+                        </p>
+                        <p className="text-lg text-text-primary leading-snug">
+                          Open full album
+                        </p>
+                        <p className="mt-2 text-sm text-text-secondary break-all">
+                          {link}
+                        </p>
+                      </IntentLink>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="space-y-6">
+            <section className="card-base p-6 space-y-4">
+              <div>
+                <span className="text-label block mb-2">Peak facts</span>
+                <h2 className="font-display text-2xl text-text-primary tracking-tight">
+                  Summit reference
+                </h2>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { label: "State", value: canonicalPeak?.state ?? record.state ?? "—" },
+                  { label: "Elevation", value: canonicalPeak?.elevationFt ? `${canonicalPeak.elevationFt.toLocaleString()} ft` : "—" },
+                  { label: "Prominence", value: canonicalPeak?.prominenceFt ? `${canonicalPeak.prominenceFt.toLocaleString()} ft` : "—" },
+                  { label: "Region", value: canonicalPeak?.region ?? record.country ?? "—" },
+                  { label: "Difficulty", value: canonicalPeak?.difficulty ?? record.difficulty ?? "—" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-text-muted">{item.label}</span>
+                    <span className="text-xs font-mono text-text-secondary text-right">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+              {canonicalPeak?.tags?.length ? (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {canonicalPeak.tags.map((tag) => (
+                    <span key={tag} className="tag text-[10px]">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </section>
+
             <section className="card-base p-6 space-y-4">
               <div>
                 <span className="text-label block mb-2">Location</span>
@@ -342,33 +478,19 @@ export default async function PublicClimbPage({
               </section>
             )}
 
-            {record.externalAlbumLinks.length > 0 && (
+            {canonicalPeak?.climb?.personalNotes ? (
               <section className="card-base p-6 space-y-4">
                 <div>
-                  <span className="text-label block mb-2">Albums</span>
+                  <span className="text-label block mb-2">Sample field notes</span>
                   <h2 className="font-display text-2xl text-text-primary tracking-tight">
-                    External photo collections
+                    Default summit notes
                   </h2>
                 </div>
-                <div className="space-y-3">
-                  {record.externalAlbumLinks.map((link) => (
-                    <Link
-                      key={link}
-                      href={link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block rounded-2xl border border-border bg-card px-4 py-4 text-sm text-text-secondary hover:bg-card-hover transition-colors"
-                    >
-                      <span className="inline-flex items-center gap-2 text-text-primary">
-                        Open album
-                        <ExternalLink className="w-4 h-4 text-summit" />
-                      </span>
-                      <span className="block mt-2 break-all text-xs text-text-muted">{link}</span>
-                    </Link>
-                  ))}
-                </div>
+                <p className="text-sm leading-relaxed text-text-secondary italic">
+                  {canonicalPeak.climb.personalNotes}
+                </p>
               </section>
-            )}
+            ) : null}
           </div>
         </div>
       </section>

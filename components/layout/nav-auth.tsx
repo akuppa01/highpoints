@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { IntentLink } from "@/components/ui/intent-link";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { UserProfile } from "@/types";
@@ -114,12 +114,14 @@ export function NavAuth() {
 
   if (!viewer) {
     return (
-      <Link
+      <IntentLink
         href="/login"
-        className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:border-border-light hover:bg-card transition-colors"
+        hoverPrefetch
+        pendingHint
+        className="inline-flex items-center rounded-full border border-border px-3.5 py-2 text-sm text-text-secondary hover:text-text-primary hover:border-border-light hover:bg-card transition-colors"
       >
         Sign In
-      </Link>
+      </IntentLink>
     );
   }
 
@@ -127,18 +129,20 @@ export function NavAuth() {
 
   return (
     <div className="flex items-center gap-2">
-      <Link
+      <IntentLink
         href="/dashboard"
-        className="inline-flex items-center gap-3 rounded-full border border-border bg-card px-2.5 py-1.5 hover:border-border-light transition-colors"
+        hoverPrefetch
+        pendingHint
+        className="inline-flex items-center gap-2 md:gap-3 rounded-full border border-border bg-card px-2 py-1.5 hover:border-border-light transition-colors"
       >
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-summit/15 border border-summit/25 text-xs font-mono text-summit-light">
           {initials}
         </div>
-        <div className="hidden lg:block pr-1 text-left">
+        <div className="hidden lg:block pr-1 text-left min-w-0">
           <p className="text-sm text-text-primary leading-none">{viewer.displayName}</p>
           <p className="mt-1 text-[11px] font-mono text-text-muted leading-none">@{viewer.username}</p>
         </div>
-      </Link>
+      </IntentLink>
 
       <button
         type="button"
@@ -147,7 +151,7 @@ export function NavAuth() {
           await supabase.auth.signOut();
           startTransition(() => router.push("/"));
         }}
-        className="inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-card transition-colors"
+        className="inline-flex items-center gap-2 rounded-full border border-transparent px-2.5 py-2 text-sm text-text-secondary hover:text-text-primary hover:bg-card transition-colors disabled:cursor-wait"
         disabled={isPending}
       >
         <LogOut className="h-4 w-4" />

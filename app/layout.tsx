@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
+import { Inter, Playfair_Display, Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/layout/nav";
 import { Footer } from "@/components/layout/footer";
+import { RouteTransitionProvider } from "@/components/ui/route-transition";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const sourceCodePro = Source_Code_Pro({
+  subsets: ["latin"],
+  variable: "--font-source-code-pro",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -30,11 +50,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-base font-sans text-text-primary min-h-screen flex flex-col antialiased">
-        <Nav />
-        <main className="flex-1">{children}</main>
-        <Footer />
+    <html lang="en" data-scroll-behavior="smooth">
+      <body
+        className={`${inter.variable} ${playfair.variable} ${sourceCodePro.variable} bg-base font-sans text-text-primary min-h-screen flex flex-col antialiased`}
+      >
+        <RouteTransitionProvider>
+          <Nav />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </RouteTransitionProvider>
       </body>
     </html>
   );

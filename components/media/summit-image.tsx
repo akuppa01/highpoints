@@ -40,7 +40,6 @@ export function SummitImage({
       src={src}
       alt={alt}
       fill
-      unoptimized
       priority={priority}
       sizes={sizes}
       className={cn("object-cover", className)}

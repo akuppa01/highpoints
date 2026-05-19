@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SummitImage } from "@/components/media/summit-image";
 import { getFeaturedPeaks } from "@/lib/data/peaks-data";
+import { IntentLink } from "@/components/ui/intent-link";
 import { cn, formatDate, formatElevation } from "@/lib/utils";
 import type { PeakWithClimb } from "@/types";
 
@@ -15,8 +15,9 @@ function FeaturedCard({
   showCompletion?: boolean;
 }) {
   return (
-    <Link
+    <IntentLink
       href={`/peaks/${peak.slug}`}
+      hoverPrefetch
       className={cn(
         "group relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-2xl border border-border transition-all duration-500 hover:border-border-light",
         featured ? "md:min-h-[520px]" : "md:min-h-[340px]"
@@ -73,7 +74,7 @@ function FeaturedCard({
           <ArrowRight className="h-3 w-3 translate-x-0 transition-transform duration-200 group-hover:translate-x-0.5" />
         </div>
       </div>
-    </Link>
+    </IntentLink>
   );
 }
 
@@ -95,13 +96,15 @@ export function FeaturedPeaks({ showCompletion = false }: { showCompletion?: boo
               clean visuals, and a quick sense of what makes each summit memorable.
             </p>
           </div>
-          <Link
+          <IntentLink
             href="/peaks"
+            hoverPrefetch
+            pendingHint
             className="hidden items-center gap-2 text-sm text-text-muted transition-colors hover:text-text-secondary sm:flex"
           >
             All 50 peaks
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </IntentLink>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5">

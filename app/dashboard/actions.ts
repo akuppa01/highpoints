@@ -46,10 +46,25 @@ function parseLines(value: FormDataEntryValue | null) {
     .filter(Boolean);
 }
 
+function parseRecordPublishIntent(formData: FormData) {
+  const intent = parseString(formData.get("submit_intent"));
+
+  return {
+    intent,
+    forcePublished:
+      intent === "publish_now" || intent === "update_public"
+        ? true
+        : intent === "save_draft"
+          ? false
+          : null,
+  };
+}
+
 async function uploadPhotos(recordId: string, formData: FormData) {
   const files = formData
     .getAll("photos")
-    .filter((value): value is File => value instanceof File && value.size > 0);
+    .filter((value): value is File => value instanceof File && value.size > 0)
+    .slice(0, 5);
 
   if (files.length === 0 || !isSupabaseConfigured()) return;
 
@@ -154,6 +169,7 @@ export async function savePeakRecordAction(formData: FormData) {
   const canonicalPeakWithClimb = getPeakWithClimbById(canonicalPeakId);
   const defaultClimb = canonicalPeakWithClimb?.climb;
   const useCanonicalDefaults = parseBoolean(formData.get("use_canonical_defaults"));
+  const { intent, forcePublished } = parseRecordPublishIntent(formData);
   const peakName =
     parseString(formData.get("peak_name")) || canonicalPeak?.name || "Untitled climb";
   const dateClimbed = parseOptionalString(formData.get("date_climbed"));
@@ -167,6 +183,7 @@ export async function savePeakRecordAction(formData: FormData) {
     parseOptionalString(formData.get("location_label")) ||
     [canonicalPeak?.state, "United States"].filter(Boolean).join(", ");
 
+  const shouldPublish = forcePublished ?? parseBoolean(formData.get("is_published"));
   const payload = {
     user_id: profile.id,
     canonical_peak_id: canonicalPeakIdForSave,
@@ -180,21 +197,21 @@ export async function savePeakRecordAction(formData: FormData) {
     status: parseString(formData.get("status")) || "want_to_climb",
     date_climbed: dateClimbed,
     planned_for: parseOptionalString(formData.get("planned_for")),
-    route_name:
-      parseOptionalString(formData.get("route_name")) ||
-      (useCanonicalDefaults ? defaultClimb?.routeName ?? null : null),
+    route_name: useCanonicalDefaults
+      ? defaultClimb?.routeName ?? parseOptionalString(formData.get("route_name"))
+      : parseOptionalString(formData.get("route_name")),
     companions: parseOptionalString(formData.get("companions")),
     weather: parseOptionalString(formData.get("weather")),
     difficulty: parseOptionalString(formData.get("difficulty")) || canonicalPeak?.difficulty || null,
-    distance_miles:
-      parseOptionalNumber(formData.get("distance_miles")) ??
-      (useCanonicalDefaults ? defaultClimb?.distanceMiles ?? null : null),
-    elevation_gain_ft:
-      parseOptionalInteger(formData.get("elevation_gain_ft")) ??
-      (useCanonicalDefaults ? defaultClimb?.elevationGainFt ?? null : null),
-    duration_minutes:
-      parseOptionalInteger(formData.get("duration_minutes")) ??
-      (useCanonicalDefaults ? defaultClimb?.durationMinutes ?? null : null),
+    distance_miles: useCanonicalDefaults
+      ? defaultClimb?.distanceMiles ?? parseOptionalNumber(formData.get("distance_miles"))
+      : parseOptionalNumber(formData.get("distance_miles")),
+    elevation_gain_ft: useCanonicalDefaults
+      ? defaultClimb?.elevationGainFt ?? parseOptionalInteger(formData.get("elevation_gain_ft"))
+      : parseOptionalInteger(formData.get("elevation_gain_ft")),
+    duration_minutes: useCanonicalDefaults
+      ? defaultClimb?.durationMinutes ?? parseOptionalInteger(formData.get("duration_minutes"))
+      : parseOptionalInteger(formData.get("duration_minutes")),
     notes: parseOptionalString(formData.get("notes")),
     anecdotes: parseOptionalString(formData.get("anecdotes")),
     special_memories: parseOptionalString(formData.get("special_memories")),
@@ -206,7 +223,7 @@ export async function savePeakRecordAction(formData: FormData) {
     audio_transcript: parseOptionalString(formData.get("audio_transcript")),
     external_album_links: parseLines(formData.get("external_album_links")),
     hero_photo_url: parseOptionalString(formData.get("hero_photo_url")) || canonicalPeak?.heroImageUrl || null,
-    is_published: parseBoolean(formData.get("is_published")),
+    is_published: shouldPublish,
     show_notes_publicly: parseBoolean(formData.get("show_notes_publicly")),
     show_media_publicly: parseBoolean(formData.get("show_media_publicly")),
     show_stats_publicly: parseBoolean(formData.get("show_stats_publicly")),
@@ -220,7 +237,7 @@ export async function savePeakRecordAction(formData: FormData) {
     strava_pace_text: parseOptionalString(formData.get("strava_pace_text")),
     strava_route_map_image_url: parseOptionalString(formData.get("strava_route_map_image_url")),
     strava_source: parseOptionalString(formData.get("strava_source")) || "manual",
-    published_at: parseBoolean(formData.get("is_published")) ? new Date().toISOString() : null,
+    published_at: shouldPublish ? new Date().toISOString() : null,
     updated_at: new Date().toISOString(),
   };
 
@@ -249,6 +266,14 @@ export async function savePeakRecordAction(formData: FormData) {
 
   if (mode === "create") {
     redirect(`/dashboard?created=1&record=${data.id}`);
+  }
+
+  if (intent === "publish_now" || intent === "update_public") {
+    redirect(`/dashboard/records/${data.id}?saved=1&published=1`);
+  }
+
+  if (intent === "save_draft") {
+    redirect(`/dashboard/records/${data.id}?saved=1&draft=1`);
   }
 
   redirect(`/dashboard/records/${data.id}?saved=1`);
@@ -291,6 +316,115 @@ export async function deleteMediaAction(formData: FormData) {
   await supabase.from("peak_record_media").delete().eq("id", mediaId);
   await syncPublishedRecord(recordId, profile.id);
   revalidatePath(`/dashboard/records/${recordId}`);
+}
+
+export async function deleteRecordAction(formData: FormData) {
+  const profile = await requireProfile();
+  const recordId = parseString(formData.get("record_id"));
+  if (!recordId) return;
+
+  const supabase = await createClient();
+  const { data: mediaRows } = await supabase
+    .from("peak_record_media")
+    .select("storage_path")
+    .eq("peak_record_id", recordId);
+
+  const storagePaths = (mediaRows ?? [])
+    .map((row) => String(row.storage_path ?? ""))
+    .filter(Boolean);
+
+  if (storagePaths.length > 0) {
+    await supabase.storage.from("climb-photos").remove(storagePaths);
+  }
+
+  await supabase.from("published_peak_record_media").delete().eq("peak_record_id", recordId);
+  await supabase.from("published_peak_records").delete().eq("peak_record_id", recordId);
+  await supabase.from("peak_record_media").delete().eq("peak_record_id", recordId);
+  await supabase.from("peak_records").delete().eq("id", recordId).eq("user_id", profile.id);
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/u/${profile.username}`);
+  redirect("/dashboard?deleted=1");
+}
+
+export async function bulkRecordAction(formData: FormData) {
+  const profile = await requireProfile();
+  const supabase = await createClient();
+  const action = parseString(formData.get("bulk_action"));
+  const recordIds = formData
+    .getAll("record_ids")
+    .map((value) => (typeof value === "string" ? value : ""))
+    .filter(Boolean);
+
+  if (!action || recordIds.length === 0) {
+    redirect("/dashboard?error=no-records-selected");
+  }
+
+  if (action === "delete") {
+    const { data: mediaRows } = await supabase
+      .from("peak_record_media")
+      .select("storage_path")
+      .in("peak_record_id", recordIds);
+
+    const storagePaths = (mediaRows ?? [])
+      .map((row) => String(row.storage_path ?? ""))
+      .filter(Boolean);
+
+    if (storagePaths.length > 0) {
+      await supabase.storage.from("climb-photos").remove(storagePaths);
+    }
+
+    await supabase.from("published_peak_record_media").delete().in("peak_record_id", recordIds);
+    await supabase.from("published_peak_records").delete().in("peak_record_id", recordIds);
+    await supabase.from("peak_record_media").delete().in("peak_record_id", recordIds);
+    await supabase.from("peak_records").delete().in("id", recordIds).eq("user_id", profile.id);
+  } else if (action === "publish") {
+    await supabase
+      .from("peak_records")
+      .update({
+        is_published: true,
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", recordIds)
+      .eq("user_id", profile.id);
+  } else if (action === "unpublish") {
+    await supabase
+      .from("peak_records")
+      .update({
+        is_published: false,
+        published_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", recordIds)
+      .eq("user_id", profile.id);
+  } else if (action === "mark_completed") {
+    await supabase
+      .from("peak_records")
+      .update({
+        status: "completed",
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", recordIds)
+      .eq("user_id", profile.id);
+  } else if (action === "move_to_planning") {
+    await supabase
+      .from("peak_records")
+      .update({
+        status: "planning",
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", recordIds)
+      .eq("user_id", profile.id);
+  }
+
+  for (const recordId of recordIds) {
+    await syncPublishedRecord(recordId, profile.id);
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/u/${profile.username}`);
+  redirect(`/dashboard?bulk=${action}&count=${recordIds.length}`);
 }
 
 export async function signOutAction() {

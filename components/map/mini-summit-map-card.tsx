@@ -10,7 +10,8 @@ function resolveCanonicalPeakId(record: RecordLike) {
     return record.canonicalPeakId;
   }
 
-  return record.peak?.id ?? null;
+  const publishedRecord = record as Pick<PublishedPeakRecord, "peak">;
+  return publishedRecord.peak?.id ?? null;
 }
 
 function isHighlightedStatus(status: RecordStatus) {

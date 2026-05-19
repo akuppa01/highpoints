@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { ArrowRight, BookOpenText, Map } from "lucide-react";
 import { getFeaturedPeaks } from "@/lib/data/peaks-data";
 import { SummitImage } from "@/components/media/summit-image";
+import { IntentLink } from "@/components/ui/intent-link";
 
 export function Hero() {
   const [primary, secondary, tertiary] = getFeaturedPeaks().slice(0, 3);
@@ -35,18 +35,18 @@ export function Hero() {
             </p>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/peaks" className="btn-primary">
+              <IntentLink href="/peaks" hoverPrefetch pendingHint className="btn-primary">
                 Explore Peaks
                 <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link href="/map" className="btn-secondary">
+              </IntentLink>
+              <IntentLink href="/map" hoverPrefetch pendingHint className="btn-secondary">
                 <Map className="w-4 h-4" />
                 Browse the Map
-              </Link>
-              <Link href="/login" className="btn-secondary">
+              </IntentLink>
+              <IntentLink href="/login" hoverPrefetch pendingHint className="btn-secondary">
                 <BookOpenText className="w-4 h-4" />
                 Start a Journal
-              </Link>
+              </IntentLink>
             </div>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Mountain } from "lucide-react";
+import { IntentLink } from "@/components/ui/intent-link";
 
 export function Footer() {
   return (
@@ -14,15 +14,15 @@ export function Footer() {
           </div>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-muted">
-            <Link href="/peaks" className="hover:text-text-secondary transition-colors">
+            <IntentLink href="/peaks" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
               All Peaks
-            </Link>
-            <Link href="/map" className="hover:text-text-secondary transition-colors">
+            </IntentLink>
+            <IntentLink href="/map" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
               Map
-            </Link>
-            <Link href="/dashboard" className="hover:text-text-secondary transition-colors">
+            </IntentLink>
+            <IntentLink href="/dashboard" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
               Journal
-            </Link>
+            </IntentLink>
             <a
               href="https://en.wikipedia.org/wiki/List_of_U.S._states_by_elevation"
               target="_blank"
