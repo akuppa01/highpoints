@@ -16,9 +16,7 @@ type RouteTransitionContextValue = {
   beginTransition: () => void;
 };
 
-const RouteTransitionContext = createContext<RouteTransitionContextValue | null>(
-  null
-);
+const RouteTransitionContext = createContext<RouteTransitionContextValue | null>(null);
 
 function SummitLoader({
   label = "Loading next route",
@@ -62,7 +60,10 @@ function SummitLoader({
           {label}
         </p>
       </div>
-      <div className="mt-3 flex items-center justify-center gap-1.5" aria-hidden="true">
+      <div
+        className="mt-3 flex items-center justify-center gap-1.5"
+        aria-hidden="true"
+      >
         <span className="route-loader-dot delay-0" />
         <span className="route-loader-dot delay-150" />
         <span className="route-loader-dot delay-300" />
