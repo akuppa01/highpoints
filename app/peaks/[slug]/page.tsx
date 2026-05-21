@@ -24,6 +24,8 @@ import {
 } from "@/lib/utils";
 import { SummitImage } from "@/components/media/summit-image";
 
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return getAllPeaksWithClimbs().map((peak) => ({ slug: peak.slug }));
 }
@@ -145,15 +147,18 @@ export default async function PeakDetailPage({
                   value: climb.rating ? `${climb.rating}/5` : "—",
                   label: "Rating",
                 },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-3 px-6 py-4 first:pl-0 last:pr-0">
-                  <item.icon className="w-4 h-4 text-summit flex-shrink-0" />
-                  <div>
-                    <div className="font-mono text-lg text-text-primary">{item.value}</div>
-                    <div className="text-xs text-text-muted">{item.label}</div>
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="flex items-center gap-3 px-6 py-4 first:pl-0 last:pr-0">
+                    <Icon className="h-4 w-4 flex-shrink-0 text-summit" />
+                    <div>
+                      <div className="font-mono text-lg text-text-primary">{item.value}</div>
+                      <div className="text-xs text-text-muted">{item.label}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

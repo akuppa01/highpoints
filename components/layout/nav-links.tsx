@@ -14,7 +14,7 @@ export function NavLinks() {
   const pathname = usePathname();
 
   return (
-    <nav className="hidden sm:flex items-center gap-1 overflow-x-auto">
+    <nav className="hidden md:flex flex-1 items-center justify-center gap-2 overflow-x-auto">
       {NAV_LINKS.map((link) => (
         <IntentLink
           key={link.href}
@@ -22,7 +22,7 @@ export function NavLinks() {
           hoverPrefetch
           pendingHint
           className={cn(
-            "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors duration-150",
+            "inline-flex min-w-[84px] justify-center px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors duration-150",
             pathname === link.href || pathname.startsWith(link.href + "/")
               ? "text-text-primary bg-white/5"
               : "text-text-secondary hover:text-text-primary hover:bg-white/5"

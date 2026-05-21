@@ -1,39 +1,39 @@
+import Link from "next/link";
 import { Mountain } from "lucide-react";
-import { IntentLink } from "@/components/ui/intent-link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border mt-20">
+    <footer className="mt-20 border-t border-border">
       <div className="container-wide py-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-md bg-summit/20 border border-summit/30 flex items-center justify-center">
-              <Mountain className="w-3.5 h-3.5 text-summit-light" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-md border border-summit/30 bg-summit/20">
+              <Mountain className="h-3.5 w-3.5 text-summit-light" />
             </div>
-            <span className="font-display text-base text-text-primary">Summit</span>
+            <span className="text-base text-text-primary">Highpoints</span>
           </div>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-text-muted">
-            <IntentLink href="/peaks" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
+            <Link href="/peaks" className="transition-colors hover:text-text-secondary">
               All Peaks
-            </IntentLink>
-            <IntentLink href="/map" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
+            </Link>
+            <Link href="/map" className="transition-colors hover:text-text-secondary">
               Map
-            </IntentLink>
-            <IntentLink href="/dashboard" hoverPrefetch pendingHint className="hover:text-text-secondary transition-colors">
+            </Link>
+            <Link href="/dashboard" className="transition-colors hover:text-text-secondary">
               Journal
-            </IntentLink>
+            </Link>
             <a
               href="https://en.wikipedia.org/wiki/List_of_U.S._states_by_elevation"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-text-secondary transition-colors"
+              className="transition-colors hover:text-text-secondary"
             >
               About Highpointing
             </a>
           </div>
 
-          <p className="text-xs text-text-muted font-mono">
+          <p className="text-xs font-mono text-text-muted">
             Track the peaks that define your journey.
           </p>
         </div>

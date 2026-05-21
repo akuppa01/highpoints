@@ -38,7 +38,7 @@ function buildProgressPeaks(records: RecordLike[]): PeakWithClimb[] {
 
 export function MiniSummitMapCard({
   records,
-  title = "Summit map",
+  title = "Highpoints map",
   description = "Your canonical highpoint progress at a glance.",
 }: {
   records: RecordLike[];

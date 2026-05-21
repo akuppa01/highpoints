@@ -1,6 +1,6 @@
 "use client";
 
-import { bulkRecordAction, quickStatusUpdateAction } from "@/app/dashboard/actions";
+import { quickPublishRecordAction, quickStatusUpdateAction } from "@/app/dashboard/actions";
 import { IntentLink } from "@/components/ui/intent-link";
 import {
   groupRecordsByJournalStage,
@@ -19,20 +19,6 @@ import {
   statusLabel,
 } from "@/lib/utils";
 import type { PeakRecord, RecordStatus } from "@/types";
-
-type DashboardTab = "overview" | "plan" | "in_progress" | "completed" | "published" | "all";
-
-function getRecordViewHref(record: PeakRecord, username: string) {
-  if (record.isPublished) {
-    return `/u/${username}/climbs/${record.slug}`;
-  }
-
-  return `/dashboard/records/${record.id}`;
-}
-
-function getRecordEditHref(record: PeakRecord) {
-  return `/dashboard/records/${record.id}`;
-}
 
 function StatusSelect({ recordId, status }: { recordId: string; status: RecordStatus }) {
   return (
@@ -54,24 +40,13 @@ function StatusSelect({ recordId, status }: { recordId: string; status: RecordSt
   );
 }
 
-function SecondaryStatus({ status }: { status: RecordStatus }) {
-  if (status === "completed") return null;
-
-  return (
-    <span className={cn("tag", statusAccent(status))}>
-      {statusLabel(status)}
-    </span>
-  );
-}
-
 function RecordRow({ record, username }: { record: PeakRecord; username: string }) {
-  const href = getRecordViewHref(record, username);
-  const editHref = getRecordEditHref(record);
+  const publicHref = record.isPublished ? `/u/${username}/climbs/${record.slug}` : null;
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border border-border bg-card/75 px-4 py-4 md:flex-row md:items-center md:justify-between">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className={cn("tag", statusAccent(record.status))}>{statusLabel(record.status)}</span>
           {record.dateClimbed ? (
             <span className="text-[11px] font-mono text-text-muted">{formatDateShort(record.dateClimbed)}</span>
@@ -80,22 +55,30 @@ function RecordRow({ record, username }: { record: PeakRecord; username: string 
             <span className="text-[11px] font-mono text-text-muted">Planned {formatDateShort(record.plannedFor)}</span>
           ) : null}
         </div>
-        <IntentLink href={href} hoverPrefetch pendingHint className="block">
+
+        <IntentLink href={`/dashboard/records/${record.id}`} hoverPrefetch pendingHint className="block">
           <h3 className="font-display text-2xl leading-tight text-text-primary">{record.peakName}</h3>
         </IntentLink>
+
         <p className="mt-1 text-sm text-text-muted">
           {record.locationLabel || [record.state, record.country].filter(Boolean).join(", ")}
         </p>
+
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs font-mono">
-          <IntentLink href={editHref} hoverPrefetch pendingHint className="text-text-secondary hover:text-text-primary transition-colors">
-            Edit record
+          <IntentLink href={`/dashboard/records/${record.id}`} hoverPrefetch pendingHint className="text-text-secondary hover:text-text-primary transition-colors">
+            Edit
           </IntentLink>
-          {record.isPublished ? (
-            <IntentLink href={href} hoverPrefetch pendingHint className="text-summit hover:text-summit-light transition-colors">
-              View public story
+          {publicHref ? (
+            <IntentLink href={publicHref} hoverPrefetch pendingHint className="text-summit hover:text-summit-light transition-colors">
+              View story
             </IntentLink>
           ) : (
-            <span className="text-text-muted">Private draft</span>
+            <form action={quickPublishRecordAction}>
+              <input type="hidden" name="record_id" value={record.id} />
+              <button type="submit" className="text-summit hover:text-summit-light transition-colors">
+                Publish now
+              </button>
+            </form>
           )}
         </div>
       </div>
@@ -122,24 +105,22 @@ function RecordRow({ record, username }: { record: PeakRecord; username: string 
 }
 
 function RecordCard({ record, username }: { record: PeakRecord; username: string }) {
-  const href = getRecordViewHref(record, username);
-  const editHref = getRecordEditHref(record);
+  const publicHref = record.isPublished ? `/u/${username}/climbs/${record.slug}` : null;
 
   return (
     <article className="card-base p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="tag border border-summit/25 bg-summit/10 text-summit">Completed</span>
-            <SecondaryStatus status={record.status} />
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className={cn("tag", statusAccent(record.status))}>{statusLabel(record.status)}</span>
             {record.dateClimbed ? (
               <span className="text-[11px] font-mono text-text-muted">{formatDateShort(record.dateClimbed)}</span>
             ) : null}
           </div>
-          <IntentLink href={href} hoverPrefetch pendingHint className="block">
+          <IntentLink href={`/dashboard/records/${record.id}`} hoverPrefetch pendingHint className="block">
             <h3 className="font-display text-2xl leading-tight text-text-primary">{record.peakName}</h3>
           </IntentLink>
-          <p className="text-sm text-text-muted mt-1">
+          <p className="mt-1 text-sm text-text-muted">
             {record.locationLabel || [record.state, record.country].filter(Boolean).join(", ")}
           </p>
         </div>
@@ -161,17 +142,26 @@ function RecordCard({ record, username }: { record: PeakRecord; username: string
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <p className="text-xs text-text-muted">
-          {record.isPublished ? "Published to public profile" : "Private draft"}
+          {record.isPublished ? "Published to public profile" : "Saved privately"}
         </p>
         <div className="flex items-center gap-3">
-          <IntentLink href={editHref} hoverPrefetch pendingHint className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors">
+          <IntentLink href={`/dashboard/records/${record.id}`} hoverPrefetch pendingHint className="text-xs font-mono text-text-secondary hover:text-text-primary transition-colors">
             Edit
           </IntentLink>
-          <IntentLink href={href} hoverPrefetch pendingHint className="text-xs font-mono text-summit hover:text-summit-light transition-colors">
-            {record.isPublished ? "View story" : "Preview"}
-          </IntentLink>
+          {publicHref ? (
+            <IntentLink href={publicHref} hoverPrefetch pendingHint className="text-xs font-mono text-summit hover:text-summit-light transition-colors">
+              View story
+            </IntentLink>
+          ) : (
+            <form action={quickPublishRecordAction}>
+              <input type="hidden" name="record_id" value={record.id} />
+              <button type="submit" className="text-xs font-mono text-summit hover:text-summit-light transition-colors">
+                Publish now
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </article>
@@ -181,13 +171,13 @@ function RecordCard({ record, username }: { record: PeakRecord; username: string
 function JournalSection({
   stage,
   records,
-  cardMode = false,
   username,
+  cardMode = false,
 }: {
   stage: JournalStage;
   records: PeakRecord[];
-  cardMode?: boolean;
   username: string;
+  cardMode?: boolean;
 }) {
   const meta = JOURNAL_STAGE_META[stage];
 
@@ -206,7 +196,7 @@ function JournalSection({
           Nothing here yet.
         </div>
       ) : cardMode ? (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4">
           {records.map((record) => (
             <RecordCard key={record.id} record={record} username={username} />
           ))}
@@ -222,102 +212,50 @@ function JournalSection({
   );
 }
 
-function DashboardOverview({ records, username }: { records: PeakRecord[]; username: string }) {
-  const grouped = groupRecordsByJournalStage(records);
-  const recentSummits = [...grouped.completed]
-    .sort((left, right) => {
-      const leftDate = left.dateClimbed ?? left.updatedAt;
-      const rightDate = right.dateClimbed ?? right.updatedAt;
-      return new Date(rightDate).getTime() - new Date(leftDate).getTime();
-    })
-    .slice(0, 6);
-
-  return (
-    <div className="space-y-8">
-      <JournalSection stage="plan" records={grouped.plan.slice(0, 5)} username={username} />
-      <JournalSection stage="in_progress" records={grouped.in_progress.slice(0, 5)} username={username} />
-      <JournalSection stage="completed" records={recentSummits} cardMode username={username} />
-    </div>
-  );
-}
-
-function GroupedRecords({ records, username }: { records: PeakRecord[]; username: string }) {
+function BoardView({ records, username }: { records: PeakRecord[]; username: string }) {
   const grouped = groupRecordsByJournalStage(records);
 
   return (
-    <div className="space-y-8">
+    <div className="grid gap-5 xl:grid-cols-3">
       {JOURNAL_STAGE_ORDER.map((stage) => (
-        <JournalSection key={stage} stage={stage} records={grouped[stage]} cardMode={stage === "completed"} username={username} />
+        <div key={stage} className={cn("rounded-[28px] border p-5 md:p-6", JOURNAL_STAGE_META[stage].tone)}>
+          <JournalSection stage={stage} records={grouped[stage].slice(0, 6)} username={username} cardMode={stage === "completed"} />
+        </div>
       ))}
     </div>
   );
 }
 
-function BulkToolbar({ records }: { records: PeakRecord[] }) {
-  return (
-    <div className="rounded-2xl border border-border bg-card/70 p-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">
-            Bulk actions
-          </p>
-          <p className="mt-2 text-sm text-text-secondary">
-            Best fits here: publish selected stories, make them private again, mark climbs completed, move future plans back to planning, or delete a batch of old drafts.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="submit" name="bulk_action" value="publish" className="btn-secondary">
-            Publish
-          </button>
-          <button type="submit" name="bulk_action" value="unpublish" className="btn-secondary">
-            Make private
-          </button>
-          <button type="submit" name="bulk_action" value="mark_completed" className="btn-secondary">
-            Mark completed
-          </button>
-          <button type="submit" name="bulk_action" value="move_to_planning" className="btn-secondary">
-            Move to planning
-          </button>
-          <button type="submit" name="bulk_action" value="delete" className="inline-flex items-center rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-2.5 text-sm text-rose-100 hover:bg-rose-400/20 transition-colors">
-            Delete
-          </button>
-        </div>
-      </div>
+function ListView({
+  records,
+  username,
+  stageFilter,
+}: {
+  records: PeakRecord[];
+  username: string;
+  stageFilter: "all" | JournalStage;
+}) {
+  const grouped = groupRecordsByJournalStage(records);
+  const stages = stageFilter === "all" ? JOURNAL_STAGE_ORDER : [stageFilter];
 
-      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {records.map((record) => (
-          <label
-            key={record.id}
-            className="flex items-start gap-3 rounded-2xl border border-border bg-base/60 px-4 py-4"
-          >
-            <input
-              type="checkbox"
-              name="record_ids"
-              value={record.id}
-              className="mt-1 h-4 w-4 rounded border-border bg-transparent text-summit focus:ring-summit"
-            />
-            <span className="min-w-0">
-              <span className="block text-sm text-text-primary">{record.peakName}</span>
-              <span className="mt-1 block text-xs font-mono text-text-muted">
-                {statusLabel(record.status)}{record.isPublished ? " · public" : " · private"}
-              </span>
-            </span>
-          </label>
-        ))}
-      </div>
+  return (
+    <div className="space-y-8">
+      {stages.map((stage) => (
+        <JournalSection key={stage} stage={stage} records={grouped[stage]} username={username} cardMode={stage === "completed"} />
+      ))}
     </div>
   );
 }
 
 export function DashboardRecords({
   records,
-  view,
-  tab,
+  viewMode,
+  stageFilter,
   username,
 }: {
   records: PeakRecord[];
-  view: "overview" | "all";
-  tab: DashboardTab;
+  viewMode: "board" | "list";
+  stageFilter: "all" | JournalStage;
   username: string;
 }) {
   if (records.length === 0) {
@@ -326,49 +264,15 @@ export function DashboardRecords({
         <p className="font-display text-3xl text-text-primary">Start with one meaningful summit.</p>
         <p className="text-text-secondary mt-3 max-w-xl mx-auto">
           Add a canonical state highpoint or create your own custom peak record.
-          Your journal can stay quick and private at first, then grow into a richer story over time.
+          Save it privately first, then publish the ones that are worth showing off.
         </p>
       </div>
     );
   }
 
-  if (view === "overview" || tab === "overview") {
-    return <DashboardOverview records={records} username={username} />;
+  if (viewMode === "board") {
+    return <BoardView records={records} username={username} />;
   }
 
-  const grouped = groupRecordsByJournalStage(records);
-  const filteredRecords =
-    tab === "published"
-      ? records.filter((record) => record.isPublished)
-      : tab === "all"
-        ? records
-        : grouped[tab as JournalStage];
-
-  return (
-    <form action={bulkRecordAction} className="space-y-6">
-      <BulkToolbar records={filteredRecords} />
-      {tab === "all" ? (
-        <GroupedRecords records={filteredRecords} username={username} />
-      ) : tab === "published" ? (
-        <section className="space-y-3">
-          <div>
-            <p className="text-label mb-1">Published</p>
-            <p className="text-sm text-text-muted">Stories already live on your public journal.</p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            {filteredRecords.map((record) => (
-              <RecordCard key={record.id} record={record} username={username} />
-            ))}
-          </div>
-        </section>
-      ) : (
-        <JournalSection
-          stage={tab as JournalStage}
-          records={filteredRecords}
-          cardMode={tab === "completed"}
-          username={username}
-        />
-      )}
-    </form>
-  );
+  return <ListView records={records} username={username} stageFilter={stageFilter} />;
 }

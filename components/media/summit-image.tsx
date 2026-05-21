@@ -28,7 +28,7 @@ export function SummitImage({
             <Mountain className="h-5 w-5 text-summit-light" />
           </div>
           <p className="text-[11px] font-mono uppercase tracking-[0.22em] text-text-muted">
-            Summit image unavailable
+            Mountain image unavailable
           </p>
         </div>
       </div>

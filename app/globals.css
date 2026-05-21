@@ -5,9 +5,9 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --font-inter: "Inter", sans-serif;
-    --font-playfair: "Playfair Display", serif;
-    --font-source-code-pro: "Source Code Pro", monospace;
+    --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-playfair: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-source-code-pro: "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
   }
 
   html {
@@ -86,13 +86,13 @@
 
   /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-center;
     @apply bg-summit text-white text-sm font-medium;
     @apply hover:bg-summit-light transition-colors duration-200;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-lg;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-center;
     @apply border border-border-light text-text-secondary text-sm font-medium;
     @apply hover:border-border-light hover:text-text-primary hover:bg-white/5;
     @apply transition-all duration-200;
@@ -135,6 +135,7 @@
     @apply inline-flex flex-col items-center rounded-[28px] border border-border bg-base shadow-2xl backdrop-blur-xl;
     background-color: rgba(8, 8, 8, 0.88);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+    will-change: transform, opacity;
   }
 }
 
@@ -257,13 +258,14 @@
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    background: rgba(8, 8, 8, 0.18);
+    background: rgba(8, 8, 8, 0.28);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 180ms ease, visibility 180ms ease;
+    will-change: opacity;
   }
 
   .route-loader-overlay.is-visible {

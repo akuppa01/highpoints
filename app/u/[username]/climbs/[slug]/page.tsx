@@ -6,15 +6,15 @@ import {
   Calendar,
   Clock3,
   ExternalLink,
-  MapPin,
+  Flag,
   Mountain,
   Route,
   TrendingUp,
   User,
 } from "lucide-react";
 import { ClimbRecapCard } from "@/components/public/share-cards";
-import { JourneyMap } from "@/components/public/journey-map";
 import { ShareCopyButton } from "@/components/public/share-copy-button";
+import { ShareStoryButton } from "@/components/public/share-story-button";
 import { IntentLink } from "@/components/ui/intent-link";
 import { getPublishedRecord } from "@/lib/data/records";
 import { getPeakWithClimbById } from "@/lib/data/peaks-data";
@@ -77,7 +77,20 @@ export default async function PublicClimbPage({
   return (
     <article className="pt-14 min-h-screen">
       <section className="relative overflow-hidden border-b border-border bg-surface">
-        <div className="absolute inset-0 opacity-30 bg-gradient-to-br from-summit/15 via-transparent to-summit-amber/10" />
+        {heroImage ? (
+          <div className="absolute inset-0">
+            <Image
+              src={heroImage}
+              alt={record.peakName}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority
+            />
+          </div>
+        ) : null}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(120,178,132,0.2),transparent_28%),radial-gradient(circle_at_82%_20%,rgba(114,153,232,0.18),transparent_22%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-base/70 via-base/72 to-base" />
         <div className="container-wide relative py-8 md:py-12">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <IntentLink
@@ -89,7 +102,18 @@ export default async function PublicClimbPage({
               <ArrowLeft className="w-4 h-4" />
               Back to @{username}
             </IntentLink>
-            <ShareCopyButton url={publicUrl} />
+            <div className="flex flex-wrap items-center gap-3">
+              <ShareStoryButton
+                title={record.peakName}
+                subtitle={`@${record.username} • Tracked with Highpoints`}
+                distanceMiles={record.distanceMiles}
+                elevationGainFt={record.elevationGainFt}
+                durationMinutes={record.durationMinutes}
+                note={record.publicNotes || record.favoriteMoment || canonicalPeak?.shortDescription}
+                url={publicUrl}
+              />
+              <ShareCopyButton url={publicUrl} />
+            </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.35fr,0.9fr]">
@@ -139,30 +163,17 @@ export default async function PublicClimbPage({
 
             <ClimbRecapCard
               title={record.peakName}
-              subtitle={`@${record.username} • Tracked with High Points`}
+              subtitle={`@${record.username} • Tracked with Highpoints`}
               distanceMiles={record.distanceMiles}
               elevationGainFt={record.elevationGainFt}
               durationMinutes={record.durationMinutes}
+              note={record.favoriteMoment || canonicalPeak?.shortDescription}
             />
           </div>
         </div>
       </section>
 
       <section className="container-wide py-10 md:py-14 space-y-8">
-        {heroImage && (
-          <div className="relative overflow-hidden rounded-[32px] border border-border bg-card min-h-[320px] md:min-h-[460px]">
-            <Image
-              src={heroImage}
-              alt={record.peakName}
-              fill
-              className="object-cover"
-              sizes="100vw"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-base via-base/10 to-transparent" />
-          </div>
-        )}
-
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="card-base p-5">
             <Route className="w-4 h-4 text-summit mb-4" />
@@ -180,7 +191,7 @@ export default async function PublicClimbPage({
             <div className="text-sm text-text-secondary mt-1">Time on trail</div>
           </div>
           <div className="card-base p-5">
-            <MapPin className="w-4 h-4 text-summit mb-4" />
+            <Flag className="w-4 h-4 text-summit mb-4" />
             <div className="font-mono text-2xl text-text-primary">{record.state || record.country || "—"}</div>
             <div className="text-sm text-text-secondary mt-1">Region</div>
           </div>
@@ -225,7 +236,7 @@ export default async function PublicClimbPage({
                 <div>
                   <span className="text-label block mb-2">About the mountain</span>
                   <h2 className="font-display text-3xl text-text-primary tracking-tight">
-                    Canonical peak context
+                    Why this summit matters
                   </h2>
                 </div>
                 {canonicalPeak?.longDescription ? (
@@ -263,6 +274,49 @@ export default async function PublicClimbPage({
                     <p className="mt-3 text-sm leading-relaxed text-text-secondary">
                       {canonicalRoute.routeDescription}
                     </p>
+                  ) : null}
+                </div>
+              </section>
+            )}
+
+            {(canonicalRoute?.weatherNotes || canonicalRoute?.gearNotes || canonicalRoute?.rating || canonicalPeak?.tags?.length) && (
+              <section className="card-base p-6 md:p-8 space-y-5">
+                <div>
+                  <span className="text-label block mb-2">Extra beta</span>
+                  <h2 className="font-display text-3xl text-text-primary tracking-tight">
+                    More context around the climb
+                  </h2>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {canonicalRoute?.weatherNotes ? (
+                    <div className="rounded-2xl border border-border bg-card px-5 py-4">
+                      <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted mb-2">Typical conditions</p>
+                      <p className="text-text-secondary">{canonicalRoute.weatherNotes}</p>
+                    </div>
+                  ) : null}
+                  {canonicalRoute?.gearNotes ? (
+                    <div className="rounded-2xl border border-border bg-card px-5 py-4">
+                      <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted mb-2">Gear notes</p>
+                      <p className="text-text-secondary">{canonicalRoute.gearNotes}</p>
+                    </div>
+                  ) : null}
+                  {typeof canonicalRoute?.rating === "number" ? (
+                    <div className="rounded-2xl border border-border bg-card px-5 py-4">
+                      <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted mb-2">Route rating</p>
+                      <p className="text-text-secondary">{canonicalRoute.rating}/5 from the built-in route guide</p>
+                    </div>
+                  ) : null}
+                  {canonicalPeak?.tags?.length ? (
+                    <div className="rounded-2xl border border-border bg-card px-5 py-4">
+                      <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted mb-2">Peak tags</p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {canonicalPeak.tags.map((tag) => (
+                          <span key={tag} className="tag text-[10px]">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   ) : null}
                 </div>
               </section>
@@ -404,25 +458,6 @@ export default async function PublicClimbPage({
                   ))}
                 </div>
               ) : null}
-            </section>
-
-            <section className="card-base p-6 space-y-4">
-              <div>
-                <span className="text-label block mb-2">Location</span>
-                <h2 className="font-display text-2xl text-text-primary tracking-tight">
-                  Place on the map
-                </h2>
-              </div>
-              <JourneyMap
-                points={[
-                  {
-                    id: record.id,
-                    name: record.peakName,
-                    latitude: record.latitude,
-                    longitude: record.longitude,
-                  },
-                ]}
-              />
             </section>
 
             {(record.strava.activityUrl || record.strava.activityTitle) && (

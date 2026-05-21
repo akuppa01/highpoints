@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type RouteTransitionContextValue = {
@@ -56,7 +56,7 @@ function SummitLoader({
       </div>
       <div className="text-center">
         <p className="font-display text-xl tracking-tight text-text-primary">
-          Summit
+          Highpoints
         </p>
         <p className="mt-1 text-xs font-mono uppercase tracking-[0.24em] text-text-muted">
           {label}
@@ -88,10 +88,8 @@ export function RouteTransitionProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [visible, setVisible] = useState(false);
   const showTimerRef = useRef<number | null>(null);
-  const shownAtRef = useRef<number | null>(null);
 
   const clearShowTimer = useCallback(() => {
     if (showTimerRef.current !== null) {
@@ -102,34 +100,23 @@ export function RouteTransitionProvider({
 
   const finishTransition = useCallback(() => {
     clearShowTimer();
-
-    const shownAt = shownAtRef.current;
-    if (!visible || shownAt === null) {
-      setVisible(false);
-      shownAtRef.current = null;
-      return;
-    }
-
-    const elapsed = Date.now() - shownAt;
-    const remaining = Math.max(0, 220 - elapsed);
-
-    window.setTimeout(() => {
-      setVisible(false);
-      shownAtRef.current = null;
-    }, remaining);
-  }, [clearShowTimer, visible]);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setVisible(false);
+      });
+    });
+  }, [clearShowTimer]);
 
   const beginTransition = useCallback(() => {
     clearShowTimer();
     showTimerRef.current = window.setTimeout(() => {
-      shownAtRef.current = Date.now();
       setVisible(true);
-    }, 120);
+    }, 80);
   }, [clearShowTimer]);
 
   useEffect(() => {
     finishTransition();
-  }, [pathname, searchParams, finishTransition]);
+  }, [pathname, finishTransition]);
 
   const value = useMemo(
     () => ({

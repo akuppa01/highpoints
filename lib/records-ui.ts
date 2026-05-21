@@ -48,22 +48,26 @@ export const JOURNAL_STAGE_META: Record<
     label: string;
     description: string;
     statuses: RecordStatus[];
+    tone: string;
   }
 > = {
   plan: {
-    label: "Plan",
+    label: "Planning",
     description: "Future climbs and active planning.",
     statuses: ["want_to_climb", "planning"],
+    tone: "border-sky-400/20 bg-sky-400/8",
   },
   in_progress: {
-    label: "In progress",
+    label: "Attempted",
     description: "Attempts, visits, and unfinished stories.",
     statuses: ["partially_climbed", "visited"],
+    tone: "border-amber-400/20 bg-amber-400/8",
   },
   completed: {
     label: "Completed",
     description: "Finished climbs and return-worthy favorites.",
     statuses: ["completed", "revisit"],
+    tone: "border-emerald-400/20 bg-emerald-400/8",
   },
 };
 

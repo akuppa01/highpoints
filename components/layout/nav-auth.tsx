@@ -23,7 +23,7 @@ function getFallbackProfile(user: {
   email?: string | null;
   user_metadata?: Record<string, unknown>;
 }): UserProfile {
-  const emailPrefix = user.email?.split("@")[0] ?? "summit";
+  const emailPrefix = user.email?.split("@")[0] ?? "highpoints";
   const displayName =
     (user.user_metadata?.full_name as string | undefined) ||
     (user.user_metadata?.name as string | undefined) ||
@@ -109,7 +109,16 @@ export function NavAuth() {
   }, [router]);
 
   if (!ready) {
-    return <div className="h-10 w-28 rounded-full border border-border bg-card/70 animate-pulse" />;
+    return (
+      <IntentLink
+        href="/login"
+        hoverPrefetch
+        pendingHint
+        className="inline-flex items-center rounded-full border border-border px-3.5 py-2 text-sm text-text-secondary hover:text-text-primary hover:border-border-light hover:bg-card transition-colors opacity-85"
+      >
+        Sign In
+      </IntentLink>
+    );
   }
 
   if (!viewer) {

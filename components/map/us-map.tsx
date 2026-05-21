@@ -1,43 +1,109 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-} from "react-simple-maps";
+import { useMemo, useState } from "react";
 import type { PeakWithClimb } from "@/types";
 import { formatElevation } from "@/lib/utils";
 
-// US Atlas TopoJSON from CDN — states at medium resolution
-const GEO_URL =
-  "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
-
-// FIPS state code → state abbreviation mapping
-const FIPS_TO_CODE: Record<string, string> = {
-  "01": "AL","02": "AK","04": "AZ","05": "AR","06": "CA",
-  "08": "CO","09": "CT","10": "DE","12": "FL","13": "GA",
-  "15": "HI","16": "ID","17": "IL","18": "IN","19": "IA",
-  "20": "KS","21": "KY","22": "LA","23": "ME","24": "MD",
-  "25": "MA","26": "MI","27": "MN","28": "MS","29": "MO",
-  "30": "MT","31": "NE","32": "NV","33": "NH","34": "NJ",
-  "35": "NM","36": "NY","37": "NC","38": "ND","39": "OH",
-  "40": "OK","41": "OR","42": "PA","44": "RI","45": "SC",
-  "46": "SD","47": "TN","48": "TX","49": "UT","50": "VT",
-  "51": "VA","53": "WA","54": "WV","55": "WI","56": "WY",
-};
-
 interface TooltipState {
   peak: PeakWithClimb;
-  x: number;
-  y: number;
 }
 
 interface USMapProps {
   peaks: PeakWithClimb[];
   interactive?: boolean;
   variant?: "progress" | "catalog";
+}
+
+type Tile = {
+  code: string;
+  row: number;
+  col: number;
+};
+
+const TILE_LAYOUT: Tile[] = [
+  { code: "AK", row: 6, col: 0 },
+  { code: "HI", row: 7, col: 1 },
+  { code: "WA", row: 0, col: 1 },
+  { code: "OR", row: 1, col: 1 },
+  { code: "CA", row: 2, col: 1 },
+  { code: "ID", row: 1, col: 2 },
+  { code: "NV", row: 2, col: 2 },
+  { code: "UT", row: 2, col: 3 },
+  { code: "AZ", row: 3, col: 2 },
+  { code: "MT", row: 0, col: 3 },
+  { code: "WY", row: 1, col: 3 },
+  { code: "CO", row: 2, col: 4 },
+  { code: "NM", row: 3, col: 4 },
+  { code: "ND", row: 0, col: 5 },
+  { code: "SD", row: 1, col: 5 },
+  { code: "NE", row: 2, col: 5 },
+  { code: "KS", row: 3, col: 5 },
+  { code: "OK", row: 4, col: 5 },
+  { code: "TX", row: 5, col: 5 },
+  { code: "MN", row: 0, col: 6 },
+  { code: "IA", row: 1, col: 6 },
+  { code: "MO", row: 2, col: 6 },
+  { code: "AR", row: 3, col: 6 },
+  { code: "LA", row: 4, col: 6 },
+  { code: "WI", row: 0, col: 7 },
+  { code: "IL", row: 1, col: 7 },
+  { code: "MS", row: 3, col: 7 },
+  { code: "MI", row: 0, col: 8 },
+  { code: "IN", row: 1, col: 8 },
+  { code: "KY", row: 2, col: 8 },
+  { code: "TN", row: 3, col: 8 },
+  { code: "AL", row: 4, col: 8 },
+  { code: "GA", row: 4, col: 9 },
+  { code: "FL", row: 5, col: 10 },
+  { code: "OH", row: 1, col: 9 },
+  { code: "WV", row: 2, col: 9 },
+  { code: "VA", row: 2, col: 10 },
+  { code: "NC", row: 3, col: 10 },
+  { code: "SC", row: 4, col: 10 },
+  { code: "PA", row: 1, col: 10 },
+  { code: "NY", row: 0, col: 10 },
+  { code: "VT", row: 0, col: 11 },
+  { code: "NH", row: 0, col: 12 },
+  { code: "ME", row: 0, col: 13 },
+  { code: "MD", row: 2, col: 11 },
+  { code: "DE", row: 2, col: 12 },
+  { code: "NJ", row: 1, col: 11 },
+  { code: "CT", row: 1, col: 12 },
+  { code: "RI", row: 1, col: 13 },
+  { code: "MA", row: 0, col: 12 },
+];
+
+function getTileClass({
+  hasPeak,
+  completed,
+  variant,
+  interactive,
+}: {
+  hasPeak: boolean;
+  completed: boolean;
+  variant: "progress" | "catalog";
+  interactive: boolean;
+}) {
+  if (!hasPeak) {
+    return "border-border/40 bg-[#121212] text-text-muted/40";
+  }
+
+  if (variant === "catalog") {
+    return interactive
+      ? "border-summit/25 bg-summit/10 text-text-primary hover:border-summit/45 hover:bg-summit/20"
+      : "border-summit/25 bg-summit/10 text-text-primary";
+  }
+
+  if (completed) {
+    return interactive
+      ? "border-summit/45 bg-summit/25 text-white hover:border-summit-light hover:bg-summit/35"
+      : "border-summit/45 bg-summit/25 text-white";
+  }
+
+  return interactive
+    ? "border-border bg-[#151515] text-text-secondary hover:border-border-light hover:bg-[#1b1b1b]"
+    : "border-border bg-[#151515] text-text-secondary";
 }
 
 export function USMap({
@@ -48,125 +114,82 @@ export function USMap({
   const router = useRouter();
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  // Build a map of stateCode → peak for quick lookup
-  const peakByCode = Object.fromEntries(peaks.map((p) => [p.stateCode, p]));
-
-  const handleStateClick = (stateCode: string) => {
-    if (!interactive) return;
-    const peak = peakByCode[stateCode];
-    if (peak) {
-      router.push(`/peaks/${peak.slug}`);
-    }
-  };
-
-  const handleStateEnter = (
-    stateCode: string,
-    event: React.MouseEvent<SVGElement>
-  ) => {
-    const peak = peakByCode[stateCode];
-    if (!peak) return;
-    const rect = (event.target as SVGElement)
-      .closest("svg")
-      ?.getBoundingClientRect();
-    if (!rect) return;
-    setTooltip({
-      peak,
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    });
-  };
+  const peakByCode = useMemo(
+    () => Object.fromEntries(peaks.map((peak) => [peak.stateCode, peak])),
+    [peaks]
+  );
 
   return (
-    <div className="relative w-full">
-      <ComposableMap
-        projection="geoAlbersUsa"
-        className="w-full h-auto"
-        style={{ background: "transparent" }}
+    <div className="space-y-4">
+      <div
+        className="grid gap-2"
+        style={{
+          gridTemplateColumns: "repeat(14, minmax(0, 1fr))",
+        }}
       >
-        <Geographies geography={GEO_URL}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              const fips = geo.id as string;
-              const stateCode = FIPS_TO_CODE[fips];
-              const peak = peakByCode[stateCode];
-              const completed = peak?.climb?.completed ?? false;
-              const fillDefault = variant === "catalog"
-                ? peak ? "#22312b" : "#1a1a1a"
-                : completed ? "#2d4a38" : "#1a1a1a";
-              const fillHover = variant === "catalog"
-                ? peak ? "#315244" : "#252525"
-                : completed ? "#4a7a5c" : "#252525";
-              const strokeHover = variant === "catalog"
-                ? peak ? "#5f9970" : "#2d2d2d"
-                : completed ? "#5f9970" : "#2d2d2d";
+        {TILE_LAYOUT.map((tile) => {
+          const peak = peakByCode[tile.code];
+          const completed = peak?.climb?.completed ?? false;
+          const hasPeak = Boolean(peak);
 
-              return (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  onClick={() => handleStateClick(stateCode)}
-                  onMouseEnter={(e) => handleStateEnter(stateCode, e)}
-                  onMouseLeave={() => setTooltip(null)}
-                  style={{
-                    default: {
-                      fill: fillDefault,
-                      stroke: "#0f0f0f",
-                      strokeWidth: 0.5,
-                      outline: "none",
-                    },
-                    hover: {
-                      fill: fillHover,
-                      stroke: strokeHover,
-                      strokeWidth: 0.75,
-                      outline: "none",
-                      cursor: interactive ? "pointer" : "default",
-                    },
-                    pressed: {
-                      fill: completed ? "#3d6b4e" : "#2a2a2a",
-                      outline: "none",
-                    },
-                  }}
-                />
-              );
-            })
-          }
-        </Geographies>
-      </ComposableMap>
+          return (
+            <button
+              key={tile.code}
+              type="button"
+              disabled={!interactive || !peak}
+              onClick={() => {
+                if (interactive && peak) router.push(`/peaks/${peak.slug}`);
+              }}
+              onMouseEnter={() => peak && setTooltip({ peak })}
+              onMouseLeave={() => setTooltip(null)}
+              onFocus={() => peak && setTooltip({ peak })}
+              onBlur={() => setTooltip(null)}
+              className={`aspect-square min-h-8 rounded-lg border text-[10px] font-mono transition-colors disabled:cursor-default ${getTileClass({
+                hasPeak,
+                completed,
+                variant,
+                interactive,
+              })}`}
+              style={{
+                gridColumn: tile.col + 1,
+                gridRow: tile.row + 1,
+              }}
+              aria-label={peak ? `${peak.name}, ${peak.state}` : tile.code}
+            >
+              {tile.code}
+            </button>
+          );
+        })}
+      </div>
 
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="absolute z-20 pointer-events-none"
-          style={{
-            left: tooltip.x + 12,
-            top: tooltip.y - 12,
-            transform: "translateY(-100%)",
-          }}
-        >
-          <div className="bg-surface border border-border rounded-lg px-3 py-2.5 shadow-xl min-w-[160px]">
-            <div className="flex items-center gap-1.5 mb-1">
-              {variant === "progress" && tooltip.peak.climb?.completed && (
-                <div className="w-1.5 h-1.5 rounded-full bg-summit flex-shrink-0" />
-              )}
-              <span className="text-xs font-mono text-text-muted">
-                {tooltip.peak.stateCode}
-              </span>
-            </div>
-            <p className="text-sm font-display text-text-primary leading-tight">
-              {tooltip.peak.name}
-            </p>
-            <p className="text-xs text-text-secondary font-mono mt-0.5">
-              {formatElevation(tooltip.peak.elevationFt)}
-            </p>
+      {tooltip?.peak ? (
+        <div className="rounded-2xl border border-border bg-surface px-4 py-3">
+          <div className="flex items-center gap-2 mb-1">
             {variant === "progress" && tooltip.peak.climb?.completed ? (
-              <p className="text-xs text-summit mt-1">Summited</p>
-            ) : variant === "catalog" ? (
-              <p className="text-xs text-text-muted mt-1">Open peak page</p>
-            ) : (
-              <p className="text-xs text-text-muted mt-1">Not yet climbed</p>
-            )}
+              <span className="h-2 w-2 rounded-full bg-summit" />
+            ) : null}
+            <span className="text-xs font-mono text-text-muted">
+              {tooltip.peak.stateCode}
+            </span>
           </div>
+          <p className="font-display text-lg text-text-primary leading-tight">
+            {tooltip.peak.name}
+          </p>
+          <p className="text-xs font-mono text-text-secondary mt-1">
+            {formatElevation(tooltip.peak.elevationFt)}
+          </p>
+          {variant === "progress" ? (
+            <p className="text-xs mt-2 text-text-muted">
+              {tooltip.peak.climb?.completed ? "Summited" : "Not yet climbed"}
+            </p>
+          ) : (
+            <p className="text-xs mt-2 text-text-muted">Open peak page</p>
+          )}
         </div>
+      ) : (
+        <p className="text-xs text-text-muted">
+          Hover or tap a state tile to preview the peak.
+        </p>
       )}
     </div>
   );

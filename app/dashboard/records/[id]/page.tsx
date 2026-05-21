@@ -79,7 +79,7 @@ export default async function EditRecordPage({
                 <span className="text-label block mb-2">Story preview</span>
                 <h1 className="font-display text-4xl md:text-5xl tracking-tight text-text-primary">{record.peakName}</h1>
                 <p className="mt-4 max-w-2xl text-text-secondary leading-relaxed">
-                  {record.publicNotes || record.favoriteMoment || "This record is still in progress. Add a short story, a few photos, and Summit will turn it into something worth sharing."}
+                  {record.publicNotes || record.favoriteMoment || "This record is still in progress. Add a short recap, a few photos, and Highpoints will turn it into something worth sharing."}
                 </p>
                 <p className="mt-3 text-xs font-mono text-text-muted">
                   Public URL: /u/{profile.username}/climbs/{record.slug}

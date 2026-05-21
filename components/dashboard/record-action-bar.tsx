@@ -43,6 +43,15 @@ export function RecordActionBar({
   isPublished: boolean;
   mode: "create" | "edit";
 }) {
+  const localAction = isPublished ? "save_local" : "save_draft";
+  const localLabel =
+    mode === "create"
+      ? "Save draft"
+      : isPublished
+        ? "Save local changes"
+        : "Save draft";
+  const localPending = isPublished ? "Saving..." : "Saving draft...";
+
   return (
     <div className="rounded-2xl border border-border bg-card/70 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -51,23 +60,18 @@ export function RecordActionBar({
             Record actions
           </p>
           <p className="mt-2 text-sm text-text-secondary">
-            Save privately, keep a draft, or publish a public story when it feels ready.
+            Keep it private while you edit, then publish the final page when the story feels ready.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <ActionButton
-            value="save_local"
-            label={mode === "create" ? "Save locally" : "Save changes"}
-            pendingLabel="Saving..."
-          />
-          <ActionButton
-            value="save_draft"
-            label="Save as draft"
-            pendingLabel="Saving draft..."
+            value={localAction}
+            label={localLabel}
+            pendingLabel={localPending}
           />
           <ActionButton
             value={isPublished ? "update_public" : "publish_now"}
-            label={isPublished ? "Update public page" : "Publish now"}
+            label={isPublished ? "Update public page" : "Publish page"}
             pendingLabel={isPublished ? "Updating..." : "Publishing..."}
             tone="primary"
           />

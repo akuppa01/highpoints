@@ -76,12 +76,15 @@ export function Showcase() {
                       { icon: Globe2, text: "Public notes and photos" },
                       { icon: LockKeyhole, text: "Private field notes stay private" },
                       { icon: Globe2, text: "Stats and Strava can be shared separately" },
-                    ].map((item) => (
-                      <div key={item.text} className="flex items-center gap-3 rounded-xl border border-border bg-base/70 px-4 py-3 text-sm text-text-secondary">
-                        <item.icon className="w-4 h-4 text-summit" />
-                        {item.text}
-                      </div>
-                    ))}
+                    ].map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <div key={item.text} className="flex items-center gap-3 rounded-xl border border-border bg-base/70 px-4 py-3 text-sm text-text-secondary">
+                          <Icon className="w-4 h-4 text-summit" />
+                          {item.text}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -92,7 +95,9 @@ export function Showcase() {
             <ProfileRecapCard
               peaksClimbed={7}
               totalElevationGainFt={24329}
-              highestSummit="Mount Whitney"
+              totalTrailMinutes={3340}
+              statesCoveredCount={7}
+              featuredClimbName="Mount Whitney"
             />
             <div className="card-base p-6 md:p-7">
               <span className="text-label block mb-3">Why visitors still benefit</span>

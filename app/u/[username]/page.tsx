@@ -19,14 +19,29 @@ export default async function PublicProfilePage({
   if (!payload) notFound();
 
   const { profile, records, stats } = payload;
+  const featuredRecord = records[0];
+  const heroImage = featuredRecord?.heroPhotoUrl ?? featuredRecord?.peak?.heroImageUrl ?? null;
 
   return (
     <div className="pt-14 min-h-screen">
       <section className="container-wide py-12 md:py-16 space-y-8">
         <div className="grid lg:grid-cols-[1.45fr,0.95fr] gap-6">
-          <div className="card-base p-8 md:p-10 bg-gradient-to-br from-summit/10 via-transparent to-transparent">
+          <div className="card-base relative overflow-hidden p-8 md:p-10 bg-gradient-to-br from-summit/10 via-transparent to-transparent">
+            {heroImage ? (
+              <div className="absolute inset-0 opacity-20">
+                <Image
+                  src={heroImage}
+                  alt={profile.displayName}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 62vw"
+                />
+              </div>
+            ) : null}
+            <div className="absolute inset-0 bg-gradient-to-br from-base via-base/92 to-base/78" />
+            <div className="relative">
             <span className="text-label block mb-3">Adventure profile</span>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl tracking-tight text-text-primary">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-text-primary">
               {profile.displayName}
             </h1>
             <p className="text-text-muted font-mono mt-2">@{profile.username}</p>
@@ -42,8 +57,9 @@ export default async function PublicProfilePage({
               )}
               <div className="inline-flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-summit" />
-                {stats.totalPeaksClimbed} published completions
+                {stats.totalPeaksClimbed} published {stats.totalPeaksClimbed === 1 ? "climb story" : "climb stories"}
               </div>
+            </div>
             </div>
           </div>
 
@@ -51,7 +67,9 @@ export default async function PublicProfilePage({
             <ProfileRecapCard
               peaksClimbed={stats.totalPeaksClimbed}
               totalElevationGainFt={stats.totalElevationGainFt}
-              highestSummit={stats.highestSummit?.name}
+              totalTrailMinutes={stats.totalTrailMinutes}
+              statesCoveredCount={stats.statesCovered.length}
+              featuredClimbName={featuredRecord?.peakName}
             />
             <MiniSummitMapCard
               records={records}
@@ -82,18 +100,21 @@ export default async function PublicProfilePage({
               value: `${stats.statesCovered.length} states/regions`,
               label: "Coverage",
             },
-          ].map((item) => (
-            <div key={item.label} className="card-base p-5">
-              <item.icon className="w-4 h-4 text-summit mb-4" />
-              <div className="font-mono text-2xl text-text-primary">{item.value}</div>
-              <div className="text-sm text-text-secondary mt-1">{item.label}</div>
-            </div>
-          ))}
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="card-base p-5">
+                <Icon className="mb-4 h-4 w-4 text-summit" />
+                <div className="font-mono text-2xl text-text-primary">{item.value}</div>
+                <div className="mt-1 text-sm text-text-secondary">{item.label}</div>
+              </div>
+            );
+          })}
         </div>
         <section className="space-y-4">
           <div>
             <span className="text-label block mb-2">Published climbs</span>
-            <h2 className="font-display text-3xl text-text-primary tracking-tight">The portfolio</h2>
+            <h2 className="font-display text-3xl text-text-primary tracking-tight">Story archive</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {records.map((record) => (
@@ -126,7 +147,7 @@ export default async function PublicProfilePage({
                   <p className="text-sm text-text-muted clamp-3">
                     {record.publicNotes || record.specialMemories || "Published without a written story yet."}
                   </p>
-                  <p className="text-xs font-mono text-summit">Open story</p>
+                  <p className="text-xs font-mono text-summit">Open published story</p>
                 </div>
               </IntentLink>
             ))}

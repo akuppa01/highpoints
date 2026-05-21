@@ -361,7 +361,7 @@ async function getProfileById(userId: string) {
 
 async function getUniqueUsername(base: string) {
   const supabase = await createServerClient();
-  const root = slugify(base).slice(0, 20) || "summit-user";
+  const root = slugify(base).slice(0, 20) || "highpoints-user";
 
   for (let index = 0; index < 25; index += 1) {
     const username = index === 0 ? root : `${root}-${index + 1}`;
@@ -384,7 +384,7 @@ export async function ensureCurrentProfile() {
   const existing = await getProfileById(user.id);
   if (existing) return existing;
 
-  const emailPrefix = user.email?.split("@")[0] ?? "summit";
+  const emailPrefix = user.email?.split("@")[0] ?? "highpoints";
   const displayName =
     (user.user_metadata?.full_name as string | undefined) ||
     (user.user_metadata?.name as string | undefined) ||
@@ -430,7 +430,7 @@ export async function requireProfile() {
     return {
       id: "setup-mode",
       username: "setup-mode",
-      displayName: "Summit Setup",
+      displayName: "Highpoints Setup",
       bio: "Configure Supabase to unlock personal journals, publishing, and storage.",
       avatarUrl: null,
       homeBase: null,

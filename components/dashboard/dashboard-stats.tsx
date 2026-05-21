@@ -1,6 +1,6 @@
-import { Compass, Mountain, Route, Clock4 } from "lucide-react";
-import { formatElevation, formatDistance, formatDuration } from "@/lib/utils";
+import { Clock4, Compass, Mountain, Route } from "lucide-react";
 import type { DashboardStats } from "@/types";
+import { formatDistance, formatDuration, formatElevation } from "@/lib/utils";
 
 export function DashboardStatsBar({ stats }: { stats: DashboardStats }) {
   const items = [
@@ -14,7 +14,9 @@ export function DashboardStatsBar({ stats }: { stats: DashboardStats }) {
       icon: Compass,
       value: formatElevation(stats.totalElevationGainFt),
       label: "Elevation gained",
-      sub: stats.highestPeakName ? `Highest summit: ${stats.highestPeakName}` : "Across logged outings",
+      sub: stats.highestPeakName
+        ? `Featured summit: ${stats.highestPeakName}`
+        : "Across logged outings",
     },
     {
       icon: Route,
@@ -31,19 +33,23 @@ export function DashboardStatsBar({ stats }: { stats: DashboardStats }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-      {items.map((item) => (
-        <div key={item.label} className="card-base flex items-start gap-4 px-5 py-5">
-          <div className="w-9 h-9 rounded-xl bg-summit/10 border border-summit/20 flex items-center justify-center flex-shrink-0">
-            <item.icon className="w-4 h-4 text-summit" />
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {items.map((item) => {
+        const Icon = item.icon;
+
+        return (
+          <div key={item.label} className="card-base flex items-start gap-4 px-5 py-5">
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-summit/20 bg-summit/10">
+              <Icon className="h-4 w-4 text-summit" />
+            </div>
+            <div>
+              <p className="font-mono text-xl text-text-primary md:text-2xl">{item.value}</p>
+              <p className="text-sm text-text-secondary">{item.label}</p>
+              <p className="text-xs font-mono text-text-muted">{item.sub}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-mono text-xl md:text-2xl text-text-primary">{item.value}</p>
-            <p className="text-sm text-text-secondary">{item.label}</p>
-            <p className="text-xs text-text-muted font-mono">{item.sub}</p>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

@@ -260,6 +260,7 @@ export async function savePeakRecordAction(formData: FormData) {
   await uploadPhotos(String(data.id), formData);
   await syncPublishedRecord(String(data.id), profile.id);
   revalidatePath("/dashboard");
+  revalidatePath("/map");
   revalidatePath(`/dashboard/records/${data.id}`);
   revalidatePath(`/u/${profile.username}`);
   revalidatePath(`/u/${profile.username}/climbs/${slug}`);
@@ -294,6 +295,39 @@ export async function quickStatusUpdateAction(formData: FormData) {
 
   await syncPublishedRecord(recordId, profile.id);
   revalidatePath("/dashboard");
+  revalidatePath("/map");
+  revalidatePath(`/u/${profile.username}`);
+}
+
+export async function quickPublishRecordAction(formData: FormData) {
+  const profile = await requireProfile();
+  const recordId = parseString(formData.get("record_id"));
+  if (!recordId) return;
+
+  const supabase = await createClient();
+  const publishedAt = new Date().toISOString();
+
+  const { data } = await supabase
+    .from("peak_records")
+    .update({
+      is_published: true,
+      published_at: publishedAt,
+      updated_at: publishedAt,
+    })
+    .eq("id", recordId)
+    .eq("user_id", profile.id)
+    .select("slug")
+    .single();
+
+  await syncPublishedRecord(recordId, profile.id);
+  revalidatePath("/dashboard");
+  revalidatePath("/map");
+  revalidatePath(`/dashboard/records/${recordId}`);
+  revalidatePath(`/u/${profile.username}`);
+
+  if (data?.slug) {
+    revalidatePath(`/u/${profile.username}/climbs/${data.slug}`);
+  }
 }
 
 export async function deleteMediaAction(formData: FormData) {
@@ -316,6 +350,7 @@ export async function deleteMediaAction(formData: FormData) {
   await supabase.from("peak_record_media").delete().eq("id", mediaId);
   await syncPublishedRecord(recordId, profile.id);
   revalidatePath(`/dashboard/records/${recordId}`);
+  revalidatePath(`/u/${profile.username}`);
 }
 
 export async function deleteRecordAction(formData: FormData) {

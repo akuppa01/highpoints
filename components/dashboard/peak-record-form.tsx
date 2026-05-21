@@ -114,7 +114,7 @@ export function PeakRecordForm({
               {isCreate ? "Log a climb in under a minute" : "Refine the climb story"}
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
-              Start with the essentials, save quickly, and only open the richer memory fields when you actually want them.
+              Start with the essentials people actually care about, then open the deeper details only if you want a richer story page.
             </p>
           </div>
           <span className={`tag ${statusAccent(record.status)}`}>
@@ -155,22 +155,50 @@ export function PeakRecordForm({
           </label>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           <Input label="Peak name" name="peak_name" defaultValue={record.peakName} placeholder="Mount Whitney" />
-          <Input label="Location label" name="location_label" defaultValue={record.locationLabel} placeholder="California, United States" />
-          <Input label="State / region" name="state" defaultValue={record.state} placeholder="California" />
-          <Input label="Country" name="country" defaultValue={record.country} placeholder="United States" />
           <Input label="Date climbed" name="date_climbed" defaultValue={record.dateClimbed} type="date" />
-          <Input label="Planned for" name="planned_for" defaultValue={record.plannedFor} type="date" />
+          <label className="block space-y-2">
+            <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">How hard was it?</span>
+            <select
+              name="difficulty"
+              defaultValue={record.difficulty ?? ""}
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-text-primary focus:border-border-light focus:outline-none"
+            >
+              <option value="">Choose one</option>
+              <option value="easy">Cruisy</option>
+              <option value="moderate">Steady</option>
+              <option value="hard">Hard push</option>
+              <option value="technical">Technical</option>
+            </select>
+          </label>
+          <Input label="Who was with you?" name="companions" defaultValue={record.companions} placeholder="Friends, family, solo" />
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
-          <div className="rounded-2xl border border-border bg-card/70 p-4">
-            <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Quick climb summary</p>
-            <p className="mt-2 text-sm text-text-secondary">
-              Add your own mileage, gain, and time if you know them. If this is one of the built-in highpoints,
-              you can also tell Summit to use the standard route defaults for you.
-            </p>
+        <div className="grid gap-4 lg:grid-cols-[1.25fr,0.95fr]">
+          <div className="rounded-2xl border border-border bg-card/70 p-4 space-y-4">
+            <div>
+              <p className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Quick climb summary</p>
+              <p className="mt-2 text-sm text-text-secondary">
+                Keep this part fast: drop one short recap, one standout moment, and the route stats if you know them.
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextArea
+                label="How did it go?"
+                name="public_notes"
+                defaultValue={record.publicNotes}
+                placeholder="Short honest recap. Strong day? Brutal wind? Worth it?"
+                rows={4}
+              />
+              <TextArea
+                label="Best moment"
+                name="favorite_moment"
+                defaultValue={record.favoriteMoment}
+                placeholder="What would you tell a friend about first?"
+                rows={4}
+              />
+            </div>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <Input label="Distance (mi)" name="distance_miles" defaultValue={record.distanceMiles} type="number" />
               <Input label="Elevation gain (ft)" name="elevation_gain_ft" defaultValue={record.elevationGainFt} type="number" />
@@ -181,12 +209,12 @@ export function PeakRecordForm({
           <div className="rounded-2xl border border-border bg-card/70 p-4 space-y-4">
             <Checkbox
               name="use_canonical_defaults"
-              label="Use Summit defaults for route + stats"
+              label="Use built-in route defaults"
               defaultChecked={isCreate}
-              description="For canonical state highpoints, Summit will replace route name, distance, elevation gain, and time with the standard climb defaults when you save."
+              description="For built-in state highpoints, this fills in the standard route, distance, elevation gain, and duration for you when you save."
             />
             <p className="rounded-xl border border-dashed border-border px-3 py-3 text-xs leading-relaxed text-text-muted">
-              Best for fast logging. If you already entered your own numbers and check this box, the Summit defaults will win.
+              Best for fast logging. If this box is checked, the built-in defaults override any manual route or stat numbers you typed above.
             </p>
             <div className="space-y-2">
               <FormSubmitButton
@@ -195,7 +223,7 @@ export function PeakRecordForm({
                 fullWidth
               />
               <p className="text-[11px] text-text-muted">
-                Quick save keeps the current publish state. Use the action bar above to force draft or publish.
+                This saves the quick details only. Use the buttons above to keep it private or push the public page live.
               </p>
             </div>
           </div>
@@ -224,11 +252,8 @@ export function PeakRecordForm({
               <span className="text-label mb-2 block">Story</span>
               <h3 className="font-display text-2xl tracking-tight text-text-primary">A short, honest climb recap</h3>
             </div>
-            <TextArea label="Public story" name="public_notes" defaultValue={record.publicNotes} placeholder="What stood out about this climb? Keep it simple and human." rows={5} />
             <div className="grid gap-5 md:grid-cols-2">
-              <TextArea label="Favorite moment" name="favorite_moment" defaultValue={record.favoriteMoment} placeholder="The one moment you’d tell a friend about first." rows={3} />
               <TextArea label="Lessons learned" name="lessons_learned" defaultValue={record.lessonsLearned} placeholder="Anything you'd do differently next time?" rows={3} />
-              <Input label="Companions" name="companions" defaultValue={record.companions} placeholder="Who was with you?" />
               <Input label="Weather" name="weather" defaultValue={record.weather} placeholder="What were the conditions like?" />
             </div>
             <TextArea label="Private notes" name="private_notes" defaultValue={record.privateNotes} placeholder="Anything just for you?" rows={3} />
@@ -262,7 +287,7 @@ export function PeakRecordForm({
               rows={3}
             />
             <p className="text-xs leading-relaxed text-text-muted">
-              Summit currently shows these as elegant album cards and outbound links. Full authenticated album importing is future-ready, but not automatic yet.
+              Highpoints currently shows these as elegant album cards and outbound links. Full authenticated album importing is future-ready, but not automatic yet.
             </p>
 
             {record.media && record.media.length > 0 ? (
@@ -319,20 +344,10 @@ export function PeakRecordForm({
             <div className="mt-5 space-y-6">
               <div className="grid gap-5 md:grid-cols-2">
                 <Input label="Route name" name="route_name" defaultValue={record.routeName} placeholder="Mount Whitney Trail" />
-                <label className="block space-y-2">
-                  <span className="text-xs font-mono uppercase tracking-[0.24em] text-text-muted">Difficulty</span>
-                  <select
-                    name="difficulty"
-                    defaultValue={record.difficulty ?? ""}
-                    className="w-full rounded-xl border border-border bg-card px-4 py-3 text-text-primary focus:border-border-light focus:outline-none"
-                  >
-                    <option value="">Not set</option>
-                    <option value="easy">Easy</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="hard">Hard</option>
-                    <option value="technical">Technical</option>
-                  </select>
-                </label>
+                <Input label="Location label" name="location_label" defaultValue={record.locationLabel} placeholder="California, United States" />
+                <Input label="State / region" name="state" defaultValue={record.state} placeholder="California" />
+                <Input label="Country" name="country" defaultValue={record.country} placeholder="United States" />
+                <Input label="Planned for" name="planned_for" defaultValue={record.plannedFor} type="date" />
                 <TextArea label="Private field notes" name="notes" defaultValue={record.notes} placeholder="Detailed notes from the day." rows={4} />
                 <TextArea label="Gear notes" name="gear_notes" defaultValue={record.gearNotes} placeholder="What worked, what failed, what to bring next time." rows={4} />
                 <TextArea label="Anecdotes" name="anecdotes" defaultValue={record.anecdotes} placeholder="Little fragments worth remembering." rows={4} />
@@ -388,10 +403,9 @@ export function PeakRecordForm({
               />
             </div>
 
-            <FormSubmitButton
-              idleLabel={isCreate ? "Save full record" : "Save and update public page"}
-              pendingLabel={isCreate ? "Saving record..." : "Updating story..."}
-            />
+            <p className="rounded-xl border border-dashed border-border px-4 py-3 text-xs leading-relaxed text-text-muted">
+              These controls change what appears on the public story page. The actual save and publish buttons stay pinned at the top so this page feels consistent.
+            </p>
           </section>
         </div>
       </details>
