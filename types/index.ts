@@ -236,6 +236,7 @@ export interface PublishedPeakRecord {
   distanceMiles?: number | null;
   elevationGainFt?: number | null;
   durationMinutes?: number | null;
+  rating?: number | null;
   publicNotes?: string | null;
   anecdotes?: string | null;
   specialMemories?: string | null;

@@ -1,5 +1,17 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { Mountain } from "lucide-react";
-import { USMap } from "@/components/map/us-map";
+
+const USMap = dynamic(
+  () => import("@/components/map/us-map").then((m) => m.USMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full aspect-[2/1] animate-pulse rounded-2xl bg-base/70 border border-border" />
+    ),
+  }
+);
 import { ALL_PEAKS } from "@/lib/data/peaks-data";
 import type { PeakWithClimb, PublishedPeakRecord, PeakRecord, RecordStatus } from "@/types";
 
@@ -55,7 +67,7 @@ export function MiniSummitMapCard({
       </div>
       <p className="text-sm text-text-muted mb-4">{description}</p>
       <div className="rounded-2xl border border-border bg-base/70 p-3">
-        <USMap peaks={peaks} interactive={false} variant="progress" />
+        <USMap peaks={peaks} interactive={false} variant="progress" compact />
       </div>
     </section>
   );

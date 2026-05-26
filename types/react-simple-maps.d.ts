@@ -26,14 +26,26 @@ declare module "react-simple-maps" {
 
   export interface ComposableMapProps {
     projection?: string;
+    projectionConfig?: {
+      scale?: number;
+      center?: [number, number];
+      rotate?: [number, number, number];
+    };
     className?: string;
     style?: React.CSSProperties;
     children?: ReactNode;
   }
 
+  export interface MarkerProps {
+    coordinates: [number, number];
+    children?: ReactNode;
+    [key: string]: unknown;
+  }
+
   export function ComposableMap(props: ComposableMapProps): JSX.Element;
   export function Geographies(props: GeographiesProps): JSX.Element;
   export function Geography(props: GeographyProps): JSX.Element;
+  export function Marker(props: MarkerProps): JSX.Element;
   export function ZoomableGroup(props: { children?: ReactNode; [key: string]: unknown }): JSX.Element;
   export function Sphere(props: { id?: string; fill?: string; stroke?: string; strokeWidth?: number }): JSX.Element;
   export function Graticule(props: { stroke?: string; strokeWidth?: number }): JSX.Element;
