@@ -15,7 +15,7 @@ export function ClimbRecapCard({
   note,
   dateClimbed,
   heroImageUrl,
-  username,
+  displayName,
 }: {
   title: string;
   subtitle: string;
@@ -28,7 +28,7 @@ export function ClimbRecapCard({
   note?: string | null;
   dateClimbed?: string | null;
   heroImageUrl?: string | null;
-  username?: string | null;
+  displayName?: string | null;
 }) {
   const stats = [
     { icon: Route, label: "Distance", value: typeof distanceMiles === "number" ? formatDistance(distanceMiles) : null },
@@ -116,11 +116,16 @@ export function ClimbRecapCard({
           </div>
 
           {/* Date + climber */}
-          {(dateClimbed || username) && (
-            <div className="flex items-center gap-3 text-[11px] font-mono text-white/50 tracking-wide">
-              {dateClimbed && <span>{dateClimbed}</span>}
-              {dateClimbed && username && <span className="opacity-40">·</span>}
-              {username && <span>@{username}</span>}
+          {(dateClimbed || displayName) && (
+            <div className="flex flex-col gap-1">
+              {displayName && (
+                <p className="text-[12px] font-mono text-white/70 tracking-wide">
+                  Summited by <span className="text-white/90 font-semibold">{displayName}</span>
+                </p>
+              )}
+              {dateClimbed && (
+                <p className="text-[11px] font-mono text-white/40 tracking-wide">{dateClimbed}</p>
+              )}
             </div>
           )}
 

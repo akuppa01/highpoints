@@ -6,13 +6,11 @@ import {
   Calendar,
   Clock3,
   ExternalLink,
-  Flag,
   MapPin,
   Mountain,
   Route,
   Star,
   TrendingUp,
-  User,
   Wind,
 } from "lucide-react";
 import { ShareCopyButton } from "@/components/public/share-copy-button";
@@ -134,13 +132,13 @@ export default async function PublicClimbPage({
                 className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors backdrop-blur-sm bg-black/20 px-3 py-1.5 rounded-full border border-white/10"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                @{username}
+                {record.userDisplayName}
               </IntentLink>
 
               <div className="flex flex-wrap items-center gap-2">
                 <ShareStoryButton
                   title={record.peakName}
-                  subtitle={`@${record.username} · Tracked with Highpoints`}
+                  subtitle={`${record.userDisplayName} · Tracked with Highpoints`}
                   location={locationLabel}
                   elevationFt={canonicalPeak?.elevationFt ?? null}
                   distanceMiles={record.distanceMiles}
@@ -150,7 +148,7 @@ export default async function PublicClimbPage({
                   note={record.favoriteMoment || record.publicNotes}
                   dateClimbed={dateDisplay}
                   heroImageUrl={heroImage ?? canonicalPeak?.heroImageUrl ?? null}
-                  username={record.username}
+                  displayName={record.userDisplayName}
                   url={publicUrl}
                 />
                 <ShareCopyButton url={publicUrl} />
@@ -197,22 +195,29 @@ export default async function PublicClimbPage({
                 </p>
               )}
 
-              {/* Climber + route */}
-              <div className="mt-5 flex flex-wrap gap-4 text-sm text-white/55">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {record.userDisplayName}
+              {/* Prominent climber byline */}
+              <div className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-2">
+                <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/8 backdrop-blur-sm px-4 py-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-summit/25 border border-summit/30 text-[11px] font-mono text-summit-light font-semibold">
+                    {record.userDisplayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white leading-none">{record.userDisplayName}</p>
+                    {dateDisplay && (
+                      <p className="text-[11px] font-mono text-white/50 mt-0.5">summited · {dateDisplay}</p>
+                    )}
+                  </div>
                 </div>
                 {record.routeName && (
-                  <div className="flex items-center gap-2">
-                    <Route className="w-4 h-4" />
-                    {record.routeName}
+                  <div className="flex items-center gap-1.5 text-sm text-white/60">
+                    <Route className="w-3.5 h-3.5" />
+                    <span>{record.routeName}</span>
                   </div>
                 )}
                 {record.weather && (
-                  <div className="flex items-center gap-2">
-                    <Wind className="w-4 h-4" />
-                    {record.weather}
+                  <div className="flex items-center gap-1.5 text-sm text-white/60">
+                    <Wind className="w-3.5 h-3.5" />
+                    <span>{record.weather}</span>
                   </div>
                 )}
               </div>
@@ -421,6 +426,29 @@ export default async function PublicClimbPage({
                 </div>
               </section>
             )}
+
+            {/* Climber's summit profile — always shown, template-ready for richer data */}
+            <section className="space-y-4">
+              <span className="text-label block">About the climber</span>
+              <div className="rounded-3xl border border-border bg-card p-6 flex items-start gap-4">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-summit/15 border border-summit/25 text-base font-mono text-summit-light font-semibold">
+                  {record.userDisplayName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-text-primary">{record.userDisplayName}</p>
+                  <p className="text-sm text-text-muted mt-0.5">@{record.username}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <span className="tag text-[10px]">{statusLabel(record.status)}</span>
+                    {canonicalPeak?.region && (
+                      <span className="tag text-[10px]">{canonicalPeak.region}</span>
+                    )}
+                    {dateDisplay && (
+                      <span className="tag text-[10px]">{dateDisplay}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
 
           {/* Right sidebar */}

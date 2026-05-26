@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Share2, Copy, Check } from "lucide-react";
+import { useRef, useState } from "react";
+import { X, Share2, Copy, Check, Download, Loader2 } from "lucide-react";
 import { ClimbRecapCard } from "@/components/public/share-cards";
 
 export function ShareStoryButton({
@@ -16,7 +16,7 @@ export function ShareStoryButton({
   note,
   dateClimbed,
   heroImageUrl,
-  username,
+  displayName,
   url,
 }: {
   title: string;
@@ -30,11 +30,13 @@ export function ShareStoryButton({
   note?: string | null;
   dateClimbed?: string | null;
   heroImageUrl?: string | null;
-  username?: string | null;
+  displayName?: string | null;
   url: string;
 }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(url);
@@ -48,6 +50,30 @@ export function ShareStoryButton({
       return;
     }
     await handleCopy();
+  }
+
+  async function handleDownload() {
+    if (!cardRef.current) return;
+    setDownloading(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(cardRef.current, {
+        allowTaint: true,
+        useCORS: true,
+        scale: 2,
+        backgroundColor: null,
+        logging: false,
+      });
+      const link = document.createElement("a");
+      link.download = `${title.replace(/\s+/g, "-").toLowerCase()}-story.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch {
+      // fallback: prompt screenshot
+      alert("Download failed — try taking a screenshot of the card instead.");
+    } finally {
+      setDownloading(false);
+    }
   }
 
   return (
@@ -71,7 +97,7 @@ export function ShareStoryButton({
                   Screenshot & share
                 </h3>
                 <p className="mt-1.5 text-sm text-text-muted max-w-xs">
-                  Screenshot the card below for Instagram Stories, text, or anywhere else you want to flex your summit.
+                  Download or screenshot the card for Instagram Stories, iMessage, or anywhere you want to flex your summit.
                 </p>
               </div>
               <button
@@ -85,22 +111,37 @@ export function ShareStoryButton({
 
             {/* Two-column: card + info */}
             <div className="grid gap-6 md:grid-cols-[auto,1fr] items-start">
-              {/* The shareable card — screenshot this */}
-              <div className="flex justify-center">
-                <ClimbRecapCard
-                  title={title}
-                  subtitle={subtitle}
-                  location={location}
-                  elevationFt={elevationFt}
-                  distanceMiles={distanceMiles}
-                  elevationGainFt={elevationGainFt}
-                  durationMinutes={durationMinutes}
-                  rating={rating}
-                  note={note}
-                  dateClimbed={dateClimbed}
-                  heroImageUrl={heroImageUrl}
-                  username={username}
-                />
+              {/* The shareable card — ref for download */}
+              <div className="flex flex-col items-center gap-3">
+                <div ref={cardRef}>
+                  <ClimbRecapCard
+                    title={title}
+                    subtitle={subtitle}
+                    location={location}
+                    elevationFt={elevationFt}
+                    distanceMiles={distanceMiles}
+                    elevationGainFt={elevationGainFt}
+                    durationMinutes={durationMinutes}
+                    rating={rating}
+                    note={note}
+                    dateClimbed={dateClimbed}
+                    heroImageUrl={heroImageUrl}
+                    displayName={displayName}
+                  />
+                </div>
+                {/* Download button under card */}
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm text-text-secondary hover:text-text-primary hover:border-border-light transition-colors disabled:opacity-50 disabled:cursor-wait"
+                >
+                  {downloading
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <Download className="w-4 h-4" />
+                  }
+                  {downloading ? "Saving…" : "Download image"}
+                </button>
               </div>
 
               {/* Instructions + link share */}
@@ -109,9 +150,9 @@ export function ShareStoryButton({
                 <div className="rounded-2xl border border-border bg-card/60 p-5 space-y-4">
                   <p className="text-label">How to share</p>
                   {[
-                    { n: "1", text: "Take a screenshot of the card on the left" },
-                    { n: "2", text: "Crop to the card and post to Instagram Stories, iMessage, or wherever" },
-                    { n: "3", text: "Or share the link directly below" },
+                    { n: "1", text: "Hit \"Download image\" to save the card directly to your device" },
+                    { n: "2", text: "Post to Instagram Stories, iMessage, or wherever you want to flex" },
+                    { n: "3", text: "Or just share the public link below" },
                   ].map((step) => (
                     <div key={step.n} className="flex items-start gap-3">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-summit/30 bg-summit/10 text-[11px] font-mono text-summit">
@@ -148,7 +189,6 @@ export function ShareStoryButton({
                   </div>
                 </div>
 
-                {/* Stats reminder */}
                 <p className="text-[11px] text-text-muted text-center font-mono">
                   Card includes your stats, peak info & Highpoints branding
                 </p>
