@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mountain } from "lucide-react";
+import { NavAuth } from "@/components/layout/nav-auth";
 
 const NAV_LINKS = [
   { href: "/peaks", label: "Peaks" },
@@ -34,12 +35,7 @@ export function Nav() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="inline-flex items-center rounded-full border border-border px-3.5 py-2 text-sm text-text-secondary transition-colors hover:border-border-light hover:bg-card hover:text-text-primary"
-            >
-              Sign In
-            </Link>
+            <NavAuth />
           </div>
         </div>
       </div>
