@@ -1,7 +1,8 @@
-import { ArrowRight, BookOpenText, Map } from "lucide-react";
+import { ArrowRight, Map } from "lucide-react";
 import { getFeaturedPeaks } from "@/lib/data/peaks-data";
 import { SummitImage } from "@/components/media/summit-image";
 import { IntentLink } from "@/components/ui/intent-link";
+import { JournalCtaButton } from "@/components/ui/journal-cta-button";
 import { getDailyTrailQuote } from "@/lib/data/trail-quotes";
 
 export function Hero() {
@@ -39,10 +40,7 @@ export function Hero() {
                 Explore Peaks
                 <ArrowRight className="w-4 h-4" />
               </IntentLink>
-              <IntentLink href="/login" hoverPrefetch pendingHint className="btn-primary">
-                <BookOpenText className="w-4 h-4" />
-                Start a journal for free
-              </IntentLink>
+              <JournalCtaButton label="Start a journal for free" />
               <IntentLink href="/map" hoverPrefetch pendingHint className="btn-secondary">
                 <Map className="w-4 h-4" />
                 Browse the Map

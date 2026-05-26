@@ -1,5 +1,6 @@
-import { ArrowRight, BookOpenText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { IntentLink } from "@/components/ui/intent-link";
+import { JournalCtaButton } from "@/components/ui/journal-cta-button";
 
 export function StartJournalCta({
   title = "Start a journal for free",
@@ -23,10 +24,7 @@ export function StartJournalCta({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <IntentLink href="/login" hoverPrefetch pendingHint className="btn-primary">
-              <BookOpenText className="h-4 w-4" />
-              Start a journal
-            </IntentLink>
+            <JournalCtaButton label="Start a journal" />
             <IntentLink href="/peaks" hoverPrefetch pendingHint className="btn-secondary">
               Browse peaks
               <ArrowRight className="h-4 w-4" />
