@@ -42,8 +42,24 @@ export function MapPreviewSection() {
           </Link>
         </div>
 
-        <div className="rounded-3xl border border-border bg-surface p-5 md:p-8">
-          <USMap peaks={peaks} interactive={true} variant="catalog" />
+        <div className="rounded-3xl border border-border bg-surface p-4 md:p-6">
+          <USMap peaks={peaks} interactive={true} variant="catalog" compact />
+        </div>
+
+        {/* Expanded key */}
+        <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-sm bg-[#1a2e22] border border-[#3d6b4f] flex-shrink-0" />
+            <span className="text-[11px] font-mono text-text-muted">State highpoint page live</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-3 rounded-sm bg-[#111111] border border-[#1e1e1e] flex-shrink-0" />
+            <span className="text-[11px] font-mono text-text-muted">No data yet</span>
+          </div>
+          <span className="text-[11px] font-mono text-text-muted opacity-40">·</span>
+          <span className="text-[11px] font-mono text-text-muted opacity-50">50 state highpoints total</span>
+          <span className="text-[11px] font-mono text-text-muted opacity-40">·</span>
+          <span className="hidden sm:inline text-[11px] font-mono text-text-muted opacity-50">Hover a state for the summit name &amp; elevation · Click to open the peak page</span>
         </div>
 
         <div className="mt-5 sm:hidden">

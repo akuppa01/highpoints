@@ -58,6 +58,7 @@ export interface Climb {
   peakId: string;
   userId?: string;
   completed: boolean;
+  mapStatus?: RecordStatus | null;
   completedDate?: string;
   distanceMiles?: number;
   elevationGainFt?: number;

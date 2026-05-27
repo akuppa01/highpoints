@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Mountain, TrendingUp, Route, Clock, Star, MapPin } from "lucide-react";
 import { formatDistance, formatDuration, formatElevation, formatMaybeElevation } from "@/lib/utils";
 
@@ -43,15 +42,15 @@ export function ClimbRecapCard({
       className="relative overflow-hidden rounded-[28px] bg-[#050807]"
       style={{ aspectRatio: "9/16", maxWidth: 360, margin: "0 auto" }}
     >
-      {/* Background hero image */}
+      {/* Background hero image — plain <img> so html2canvas can capture it */}
       {heroImageUrl ? (
         <div className="absolute inset-0">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src={heroImageUrl}
             alt={title}
-            fill
-            className="object-cover"
-            sizes="360px"
+            crossOrigin="anonymous"
+            className="absolute inset-0 w-full h-full object-cover"
           />
           {/* Layered gradient: dark on top-left for logo, heavy at bottom for content */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/20 to-black/90" />
