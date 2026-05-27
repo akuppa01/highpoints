@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Calendar, Clock3, MapPin, Mountain, Route, TrendingUp } from "lucide-react";
 import { getPublicProfileByUsername } from "@/lib/data/records";
+import { buildProgressPeaks } from "@/lib/data/peaks-data";
 import { MiniSummitMapCard } from "@/components/map/mini-summit-map-card";
 import { ProfileRecapCard } from "@/components/public/share-cards";
 import { IntentLink } from "@/components/ui/intent-link";
@@ -19,6 +20,11 @@ export default async function PublicProfilePage({
   if (!payload) notFound();
 
   const { profile, records, stats } = payload;
+
+  // Build peak progress server-side for the map
+  const progressPeaks = buildProgressPeaks(
+    records.map((r) => ({ id: r.peak?.id, status: r.status }))
+  );
 
   // Hero: prefer user-uploaded photo, fall back to peak hero
   const heroImage =
@@ -127,7 +133,7 @@ export default async function PublicProfilePage({
             featuredClimbName={featuredRecord?.peakName}
           />
           <MiniSummitMapCard
-            records={records}
+            peaks={progressPeaks}
             title="Summit map"
             description="Canonical highpoint coverage across the US."
           />

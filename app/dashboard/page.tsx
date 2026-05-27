@@ -3,6 +3,7 @@ import { getDashboardRecords } from "@/lib/data/records";
 import { DashboardStatsBar } from "@/components/dashboard/dashboard-stats";
 import { DashboardRecords } from "@/components/dashboard/dashboard-records";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { buildProgressPeaks } from "@/lib/data/peaks-data";
 import { MiniSummitMapCard } from "@/components/map/mini-summit-map-card";
 import { IntentLink } from "@/components/ui/intent-link";
 import { SummitImage } from "@/components/media/summit-image";
@@ -29,6 +30,11 @@ export default async function DashboardPage({
 
   const { profile, records, stats } = await getDashboardRecords();
   const enabled = isSupabaseConfigured();
+
+  // Build peak progress server-side so the map always reflects real DB data
+  const progressPeaks = buildProgressPeaks(
+    records.map((r) => ({ id: r.canonicalPeakId, status: r.status }))
+  );
 
   const journalHero =
     records.find((r) => r.heroPhotoUrl)?.heroPhotoUrl ??
@@ -105,7 +111,7 @@ export default async function DashboardPage({
 
             {/* Compact map — right side of hero */}
             <MiniSummitMapCard
-              records={records}
+              peaks={progressPeaks}
               title="Highpoints map"
               description="Your progress at a glance."
               compact

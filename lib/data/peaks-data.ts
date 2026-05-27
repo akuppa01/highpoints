@@ -1,4 +1,4 @@
-import type { Peak, Climb, PeakWithClimb } from "@/types";
+import type { Peak, Climb, PeakWithClimb, RecordStatus } from "@/types";
 import { PEAK_IMAGE_OVERRIDES } from "@/lib/data/peak-image-overrides";
 
 // ---------------------------------------------------------------------------
@@ -1268,3 +1268,32 @@ export function getFeaturedPeaks(): PeakWithClimb[] {
 
 export const TOTAL_PEAKS = ALL_PEAKS.length;
 export const COMPLETED_PEAKS = Object.keys(SAMPLE_CLIMBS).length;
+
+/**
+ * Build a PeakWithClimb[] for the US map by merging ALL_PEAKS with a
+ * user's record statuses.  Accepts a thin projection so it works with
+ * both PeakRecord[] and PublishedPeakRecord[].
+ *
+ * Call this in a server component and pass the result straight to
+ * <MiniSummitMapCard peaks={…} />.
+ */
+export function buildProgressPeaks(
+  entries: Array<{ id?: string | null; status: RecordStatus }>
+): PeakWithClimb[] {
+  const byPeakId = new Map<string, RecordStatus>();
+  for (const e of entries) {
+    if (e.id) byPeakId.set(e.id, e.status);
+  }
+  return ALL_PEAKS.map((peak) => {
+    const status = byPeakId.get(peak.id);
+    return {
+      ...peak,
+      climb: {
+        id: `progress-${peak.id}`,
+        peakId: peak.id,
+        completed: status === "completed" || status === "revisit",
+        mapStatus: status ?? null,
+      },
+    };
+  });
+}
