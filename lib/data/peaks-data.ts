@@ -1278,14 +1278,30 @@ export const COMPLETED_PEAKS = Object.keys(SAMPLE_CLIMBS).length;
  * <MiniSummitMapCard peaks={…} />.
  */
 export function buildProgressPeaks(
-  entries: Array<{ id?: string | null; status: RecordStatus }>
+  entries: Array<{
+    id?: string | null;
+    slug?: string | null;
+    state?: string | null;
+    status: RecordStatus;
+  }>
 ): PeakWithClimb[] {
-  const byPeakId = new Map<string, RecordStatus>();
+  // Build three lookup maps so we can match even when canonical_peak_id is null.
+  // Priority: canonical id → record slug (matches canonical slug) → state name.
+  const byId   = new Map<string, RecordStatus>();
+  const bySlug  = new Map<string, RecordStatus>();
+  const byState = new Map<string, RecordStatus>(); // lowercase state name
+
   for (const e of entries) {
-    if (e.id) byPeakId.set(e.id, e.status);
+    if (e.id)    byId.set(e.id, e.status);
+    if (e.slug)  bySlug.set(e.slug, e.status);
+    if (e.state) byState.set(e.state.toLowerCase(), e.status);
   }
+
   return ALL_PEAKS.map((peak) => {
-    const status = byPeakId.get(peak.id);
+    const status =
+      byId.get(peak.id) ??
+      bySlug.get(peak.slug) ??
+      byState.get(peak.state.toLowerCase());
     return {
       ...peak,
       climb: {

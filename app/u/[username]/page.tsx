@@ -23,7 +23,12 @@ export default async function PublicProfilePage({
 
   // Build peak progress server-side for the map
   const progressPeaks = buildProgressPeaks(
-    records.map((r) => ({ id: r.peak?.id, status: r.status }))
+    records.map((r) => ({
+      id: r.peak?.id,
+      slug: r.peak?.slug ?? r.slug,
+      state: r.state,
+      status: r.status,
+    }))
   );
 
   // Hero: prefer user-uploaded photo, fall back to peak hero

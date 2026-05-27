@@ -33,7 +33,12 @@ export default async function DashboardPage({
 
   // Build peak progress server-side so the map always reflects real DB data
   const progressPeaks = buildProgressPeaks(
-    records.map((r) => ({ id: r.canonicalPeakId, status: r.status }))
+    records.map((r) => ({
+      id: r.canonicalPeakId,
+      slug: r.slug,
+      state: r.state,
+      status: r.status,
+    }))
   );
 
   const journalHero =
