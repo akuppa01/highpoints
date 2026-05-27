@@ -17,7 +17,7 @@ export function Nav() {
             <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-summit/30 bg-summit/20">
               <Mountain className="h-4 w-4 text-summit-light" />
             </div>
-            <span className="font-display font-semibold text-[15px] tracking-tight bg-gradient-to-r from-summit-light via-[#a8d4b5] to-text-primary bg-clip-text text-transparent">
+            <span className="font-display font-semibold text-[15px] tracking-tight" style={{ color: "#d4b483" }}>
               Highpoints
             </span>
           </Link>

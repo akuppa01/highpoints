@@ -74,7 +74,7 @@ export default async function DashboardPage({
         </div>
 
         <div className="relative container-wide py-10 md:py-14">
-          <div className="grid gap-6 xl:grid-cols-[1.35fr,0.65fr] xl:items-start">
+          <div className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr] xl:items-start">
 
             {/* Profile block */}
             <div className="space-y-4">
@@ -119,7 +119,6 @@ export default async function DashboardPage({
               peaks={progressPeaks}
               title="Highpoints map"
               description="Your progress at a glance."
-              compact
             />
           </div>
         </div>

@@ -2,11 +2,13 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useMemo } from "react";
-import { Mountain, TrendingUp } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Mountain } from "lucide-react";
 import { StartJournalCta } from "@/components/ui/start-journal-cta";
-import { getAllPeaksWithClimbs } from "@/lib/data/peaks-data";
+import { createClient } from "@/lib/supabase/client";
 import { formatElevation } from "@/lib/utils";
+import type { PeakWithClimb } from "@/types";
 
 const USMap = dynamic(() => import("@/components/map/us-map").then((m) => m.USMap), {
   ssr: false,
@@ -17,8 +19,34 @@ const USMap = dynamic(() => import("@/components/map/us-map").then((m) => m.USMa
   ),
 });
 
-export function MapPageClient() {
-  const peaks = getAllPeaksWithClimbs();
+export function MapPageClient({
+  peaks,
+  hasUserData = false,
+}: {
+  peaks: PeakWithClimb[];
+  hasUserData?: boolean;
+}) {
+  const router = useRouter();
+
+  // When the user is signed in, subscribe to realtime so the map updates live
+  useEffect(() => {
+    if (!hasUserData) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel("map-page-peak-records-refresh")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "peak_records" },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [hasUserData, router]);
+
   const highestPeaks = useMemo(
     () => [...peaks].sort((a, b) => b.elevationFt - a.elevationFt).slice(0, 8),
     [peaks]
@@ -39,8 +67,9 @@ export function MapPageClient() {
             The Highpoints Map
           </h1>
           <p className="mt-3 max-w-2xl text-sm text-text-muted leading-relaxed">
-            Hover any state for the summit name and elevation, then open the canonical peak page.
-            The complete geographic explorer for all 50 US state highpoints.
+            {hasUserData
+              ? "Your climb data is reflected here — completed summits, plans, and everything in between."
+              : "Hover any state for the summit name and elevation, then open the canonical peak page. The complete geographic explorer for all 50 US state highpoints."}
           </p>
         </div>
       </div>
@@ -51,7 +80,12 @@ export function MapPageClient() {
           {/* Map */}
           <div className="lg:col-span-3">
             <div className="rounded-3xl border border-border bg-surface p-5 md:p-8">
-              <USMap peaks={peaks} interactive variant="catalog" />
+              <USMap
+                peaks={peaks}
+                interactive
+                variant={hasUserData ? "progress" : "catalog"}
+                showLegend
+              />
             </div>
           </div>
 
@@ -118,12 +152,14 @@ export function MapPageClient() {
         </div>
       </div>
 
-      <div className="container-wide pb-14">
-        <StartJournalCta
-          title="Want this map to show your own progress?"
-          body="Sign in to track completed summits, attempts, and future goals. Your summited states light up in green."
-        />
-      </div>
+      {!hasUserData && (
+        <div className="container-wide pb-14">
+          <StartJournalCta
+            title="Want this map to show your own progress?"
+            body="Sign in to track completed summits, attempts, and future goals. Your summited states light up in green."
+          />
+        </div>
+      )}
     </div>
   );
 }

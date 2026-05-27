@@ -23,17 +23,17 @@ const FIPS_TO_CODE: Record<string, string> = {
 
 // Status → fill / stroke / hover / readable label
 const STATUS_PALETTE: Record<RecordStatus, { fill: string; stroke: string; hover: string; label: string }> = {
-  want_to_climb:     { fill: "#0d1e38", stroke: "#1e4585", hover: "#162d55", label: "Want to climb" },
-  planning:          { fill: "#231a05", stroke: "#665025", hover: "#33270a", label: "Planning" },
-  partially_climbed: { fill: "#261505", stroke: "#7a4015", hover: "#3d2008", label: "Partially climbed" },
-  visited:           { fill: "#062020", stroke: "#1a6055", hover: "#0a3030", label: "Visited" },
-  completed:         { fill: "#0a2818", stroke: "#2a6040", hover: "#133d25", label: "Summited ✓" },
-  revisit:           { fill: "#1a1035", stroke: "#4a3080", hover: "#251845", label: "Want to revisit" },
+  want_to_climb:     { fill: "#0f2744", stroke: "#3b82f6", hover: "#162f52", label: "Want to climb" },
+  planning:          { fill: "#271d02", stroke: "#f59e0b", hover: "#362808", label: "Planning" },
+  partially_climbed: { fill: "#2c1400", stroke: "#fb923c", hover: "#3c1c00", label: "Partially climbed" },
+  visited:           { fill: "#022526", stroke: "#22d3ee", hover: "#033436", label: "Visited" },
+  completed:         { fill: "#062416", stroke: "#22c55e", hover: "#0a3020", label: "Summited ✓" },
+  revisit:           { fill: "#1d1038", stroke: "#a855f7", hover: "#271648", label: "Want to revisit" },
 };
 
-const NO_PEAK  = { fill: "#111111", stroke: "#1a1a1a", hover: "#131313" };
-const HAS_PEAK = { fill: "#1a1a1a", stroke: "#2a2a2a", hover: "#222222" };
-const CATALOG  = { fill: "#1a2e22", stroke: "#3d6b4f", hover: "#264535" };
+const NO_PEAK  = { fill: "#0f0f0f", stroke: "#181818", hover: "#141414" };
+const HAS_PEAK = { fill: "#1c1c1c", stroke: "#2e2e2e", hover: "#242424" };
+const CATALOG  = { fill: "#172a1f", stroke: "#3a7d55", hover: "#1f3d2b" };
 
 interface USMapProps {
   peaks: PeakWithClimb[];
