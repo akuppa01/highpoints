@@ -63,41 +63,53 @@ export default async function DashboardPage({
         </div>
 
         <div className="relative container-wide py-10 md:py-14">
-          <div className="space-y-4">
-            <span className="text-label text-white/50">Personal dashboard</span>
-            <h1
-              className="font-display text-white leading-[0.9] tracking-tight"
-              style={{ fontSize: "clamp(2.25rem, 6vw, 4.5rem)" }}
-            >
-              {profile.displayName}
-            </h1>
-            <p className="text-base text-white/55 font-mono tracking-wide">Climbing Journal</p>
-            <p className="text-white/50 max-w-xl leading-relaxed text-sm md:text-base">
-              Track meaningful climbs, future plans, and unfinished attempts in one calm workspace.
-            </p>
+          <div className="grid gap-6 xl:grid-cols-[1.35fr,0.65fr] xl:items-start">
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              {enabled && (
+            {/* Profile block */}
+            <div className="space-y-4">
+              <span className="text-label text-white/50">Personal dashboard</span>
+              <h1
+                className="font-display text-white leading-[0.9] tracking-tight"
+                style={{ fontSize: "clamp(2.25rem, 6vw, 4.5rem)" }}
+              >
+                {profile.displayName}
+              </h1>
+              <p className="text-base text-white/55 font-mono tracking-wide">Climbing Journal</p>
+              <p className="text-white/50 max-w-xl leading-relaxed text-sm md:text-base">
+                Track meaningful climbs, future plans, and unfinished attempts in one calm workspace.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                {enabled && (
+                  <IntentLink
+                    href={`/u/${profile.username}`}
+                    hoverPrefetch
+                    pendingHint
+                    className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors backdrop-blur-sm bg-black/25 px-4 py-2 rounded-xl border border-white/10"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Public profile
+                  </IntentLink>
+                )}
                 <IntentLink
-                  href={`/u/${profile.username}`}
+                  href="/dashboard/new"
                   hoverPrefetch
                   pendingHint
-                  className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-white/90 transition-colors backdrop-blur-sm bg-black/25 px-4 py-2 rounded-xl border border-white/10"
+                  className="inline-flex items-center gap-2 text-sm bg-summit text-white px-4 py-2 rounded-xl border border-summit-light/30 hover:bg-summit-light transition-all"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Public profile
+                  <Plus className="w-3.5 h-3.5" />
+                  New record
                 </IntentLink>
-              )}
-              <IntentLink
-                href="/dashboard/new"
-                hoverPrefetch
-                pendingHint
-                className="inline-flex items-center gap-2 text-sm bg-summit text-white px-4 py-2 rounded-xl border border-summit-light/30 hover:bg-summit-light transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                New record
-              </IntentLink>
+              </div>
             </div>
+
+            {/* Compact map — right side of hero */}
+            <MiniSummitMapCard
+              records={records}
+              title="Highpoints map"
+              description="Your progress at a glance."
+              compact
+            />
           </div>
         </div>
       </div>
@@ -106,19 +118,6 @@ export default async function DashboardPage({
       <div className="border-b border-border bg-surface/80">
         <div className="container-wide py-1">
           <DashboardStatsBar stats={stats} />
-        </div>
-      </div>
-
-      {/* ── Full-width map section ────────────────────────────────────── */}
-      <div className="border-b border-border bg-base/50">
-        <div className="container-wide py-8">
-          <MiniSummitMapCard
-            records={records}
-            title="Your highpoints map"
-            description="All 50 state highpoints — colored by your progress. Updates in real time as you add or change records."
-            compact={false}
-            interactive={false}
-          />
         </div>
       </div>
 
@@ -197,6 +196,17 @@ export default async function DashboardPage({
               ))}
             </div>
           </div>
+
+          {/* New record CTA — top-right of the board */}
+          <IntentLink
+            href="/dashboard/new"
+            hoverPrefetch
+            pendingHint
+            className="inline-flex items-center gap-2 self-start lg:self-auto text-sm bg-summit text-white px-4 py-2 rounded-xl border border-summit-light/30 hover:bg-summit-light transition-all flex-shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New record
+          </IntentLink>
         </div>
 
         <DashboardRecords

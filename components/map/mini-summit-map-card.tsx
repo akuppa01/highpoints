@@ -91,6 +91,9 @@ export function MiniSummitMapCard({
       }
     }
 
+    // Fetch immediately on mount so the map always reflects the latest DB state
+    refreshRecords();
+
     const channel = supabase
       .channel("map-peak-records-live")
       .on(
