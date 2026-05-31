@@ -11,4 +11,12 @@ export function getBaseUrl() {
   return getPublicSiteUrl();
 }
 
+export function getRequestBaseUrl(request: Request) {
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return getPublicSiteUrl();
+  }
+}
+
 export { getDatabaseConfig, getProjectRef };

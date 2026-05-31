@@ -1,6 +1,6 @@
+import Link from "next/link";
 import { CheckCircle2, Lock, Mountain } from "lucide-react";
 import { SummitImage } from "@/components/media/summit-image";
-import { IntentLink } from "@/components/ui/intent-link";
 import {
   cn,
   difficultyBg,
@@ -19,9 +19,8 @@ export function PeakCard({ peak, variant = "default" }: PeakCardProps) {
   const completed = peak.climb?.completed ?? false;
 
   return (
-    <IntentLink
+    <Link
       href={`/peaks/${peak.slug}`}
-      hoverPrefetch
       className={cn(
         "group relative flex min-h-[260px] flex-col card-base card-hover",
         variant === "compact" ? "min-h-[180px]" : "min-h-[260px]"
@@ -100,6 +99,6 @@ export function PeakCard({ peak, variant = "default" }: PeakCardProps) {
           ) : null}
         </div>
       </div>
-    </IntentLink>
+    </Link>
   );
 }

@@ -20,7 +20,7 @@ export function JournalCtaButton({
   label?: string;
   className?: string;
 }) {
-  const [href, setHref] = useState<"/login" | "/dashboard">("/login");
+  const [href, setHref] = useState<"/waitlist" | "/dashboard">("/waitlist");
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
@@ -28,6 +28,7 @@ export function JournalCtaButton({
       .auth.getUser()
       .then(({ data: { user } }) => {
         if (user) setHref("/dashboard");
+      else setHref("/waitlist");
       });
   }, []);
 

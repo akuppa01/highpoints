@@ -5,7 +5,7 @@ import { NavAuth } from "@/components/layout/nav-auth";
 const NAV_LINKS = [
   { href: "/peaks", label: "Peaks" },
   { href: "/map", label: "Map" },
-  { href: "/dashboard", label: "Journal" },
+  { href: "/waitlist", label: "Journal" },
 ];
 
 export function Nav() {

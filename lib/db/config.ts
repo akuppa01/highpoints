@@ -1,5 +1,19 @@
 const DEFAULT_LOCAL_SITE_URL = "http://localhost:3000";
 
+function normalizeSiteUrl(url?: string | null) {
+  if (!url) return null;
+
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
 function parseProjectRefFromSupabaseUrl(url?: string | null) {
   if (!url) return null;
 
@@ -97,8 +111,12 @@ export function isDatabaseConfigured() {
 
 export function getPublicSiteUrl() {
   return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ||
+    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+    normalizeSiteUrl(
+      process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : null
+    ) ||
     DEFAULT_LOCAL_SITE_URL
   );
 }

@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getBaseUrl, isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  getBaseUrl,
+  getRequestBaseUrl,
+  isSupabaseConfigured,
+} from "@/lib/supabase/config";
 
 function getSafeNext(value: FormDataEntryValue | null) {
   if (typeof value !== "string" || value.length === 0) return "/dashboard";
@@ -11,6 +15,7 @@ function getSafeNext(value: FormDataEntryValue | null) {
 
 export async function POST(request: Request) {
   const formData = await request.formData();
+  const baseUrl = getRequestBaseUrl(request);
   const provider = typeof formData.get("provider") === "string" ? String(formData.get("provider")) : "";
   const next = getSafeNext(formData.get("next"));
 
@@ -26,7 +31,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${getBaseUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
 

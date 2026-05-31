@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Search } from "lucide-react";
-import { PeakCard } from "@/components/peaks/peak-card";
+import { SummitImage } from "@/components/media/summit-image";
 import { StartJournalCta } from "@/components/ui/start-journal-cta";
-import { getAllPeaksWithClimbs } from "@/lib/data/peaks-data";
-import { getTrailQuote } from "@/lib/data/trail-quotes";
-import { cn } from "@/lib/utils";
-import type { Region } from "@/types";
+import { cn, formatElevation } from "@/lib/utils";
+import type { PeakWithClimb, Region } from "@/types";
+import type { TrailQuote } from "@/lib/data/trail-quotes";
 
 type FilterState = "all" | "completed" | "remaining";
 
@@ -22,12 +22,16 @@ const REGIONS: Region[] = [
   "Hawaii",
 ];
 
-export function PeaksPageClient() {
-  const allPeaks = getAllPeaksWithClimbs();
+export function PeaksPageClient({
+  allPeaks,
+  quote,
+}: {
+  allPeaks: PeakWithClimb[];
+  quote: TrailQuote;
+}) {
   const [filter, setFilter] = useState<FilterState>("all");
   const [regionFilter, setRegionFilter] = useState<Region | "all">("all");
   const [search, setSearch] = useState("");
-  const quote = useMemo(() => getTrailQuote("peaks"), []);
 
   const filtered = useMemo(() => {
     return allPeaks
@@ -141,7 +145,54 @@ export function PeaksPageClient() {
             <p className="mb-6 text-xs font-mono text-text-muted">{filtered.length} peaks</p>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {filtered.map((peak) => (
-                <PeakCard key={peak.id} peak={peak} />
+                <Link
+                  key={peak.id}
+                  href={`/peaks/${peak.slug}`}
+                  className="group relative flex min-h-[260px] flex-col overflow-hidden rounded-2xl border border-border bg-card transition-transform duration-200 hover:-translate-y-0.5 hover:border-border-light"
+                >
+                  <div className="relative h-44 overflow-hidden bg-surface">
+                    {peak.heroImageUrl ? (
+                      <SummitImage
+                        src={peak.heroImageUrl}
+                        alt={peak.name}
+                        className="transition-transform duration-500 ease-out group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#1a2521] via-[#121716] to-[#0b0d0d]" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-card/25 to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <span className="text-xs font-mono text-white/65">{peak.stateCode}</span>
+                    </div>
+                    <div className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[10px] font-mono text-white/80 backdrop-blur-sm">
+                      {peak.climb?.completed ? "Done" : peak.region}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col gap-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="truncate text-base font-semibold tracking-tight text-text-primary">
+                          {peak.name}
+                        </h3>
+                        <p className="mt-1 text-xs text-text-muted">{peak.state}</p>
+                      </div>
+                      <span className="shrink-0 text-xs font-mono text-summit-amber">
+                        {formatElevation(peak.elevationFt)}
+                      </span>
+                    </div>
+
+                    <p className="line-clamp-3 text-sm leading-relaxed text-text-secondary">
+                      {peak.shortDescription}
+                    </p>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-border pt-3 text-[10px] font-mono uppercase tracking-[0.14em] text-text-muted">
+                      <span>{peak.difficulty ?? "classic"}</span>
+                      <span>{peak.region}</span>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
           </>

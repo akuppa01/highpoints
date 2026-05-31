@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Mail } from "lucide-react";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getFeaturedPeaks } from "@/lib/data/peaks-data";
@@ -14,6 +15,7 @@ export default async function LoginPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
+  redirect("/waitlist");
   const next = typeof params.next === "string" ? params.next : "/dashboard";
   const sent = params.sent === "1";
   const email = typeof params.email === "string" ? params.email : "";
@@ -84,12 +86,28 @@ export default async function LoginPage({
                       disabled={!enabled}
                       className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/60 bg-white px-5 py-3.5 text-sm font-semibold text-slate-900 shadow-[0_10px_34px_rgba(255,255,255,0.12)] transition-all hover:-translate-y-[1px] hover:shadow-[0_16px_40px_rgba(255,255,255,0.14)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      <span className="grid grid-cols-2 gap-0.5">
-                        <span className="h-2.5 w-2.5 rounded-sm bg-[#4285F4]" />
-                        <span className="h-2.5 w-2.5 rounded-sm bg-[#EA4335]" />
-                        <span className="h-2.5 w-2.5 rounded-sm bg-[#FBBC05]" />
-                        <span className="h-2.5 w-2.5 rounded-sm bg-[#34A853]" />
-                      </span>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-5 w-5"
+                      >
+                        <path
+                          d="M21.805 12.225c0-.77-.069-1.51-.197-2.22H12v4.2h5.49a4.696 4.696 0 0 1-2.037 3.08v2.56h3.294c1.93-1.777 3.058-4.397 3.058-7.62Z"
+                          fill="#4285F4"
+                        />
+                        <path
+                          d="M12 22c2.76 0 5.074-.915 6.765-2.475l-3.294-2.56c-.915.615-2.085.98-3.47.98-2.67 0-4.93-1.805-5.74-4.23H2.86v2.64A10 10 0 0 0 12 22Z"
+                          fill="#34A853"
+                        />
+                        <path
+                          d="M6.26 13.715A5.994 5.994 0 0 1 5.94 12c0-.595.1-1.175.32-1.715V7.645H2.86A10 10 0 0 0 2 12c0 1.61.385 3.135.86 4.355l3.4-2.64Z"
+                          fill="#FBBC05"
+                        />
+                        <path
+                          d="M12 6.055c1.5 0 2.845.515 3.905 1.525l2.93-2.93C17.07 2.995 14.755 2 12 2A10 10 0 0 0 2.86 7.645l3.4 2.64c.81-2.425 3.07-4.23 5.74-4.23Z"
+                          fill="#EA4335"
+                        />
+                      </svg>
                       Continue with Google
                     </button>
                   </form>

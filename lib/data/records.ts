@@ -441,7 +441,7 @@ export async function requireProfile() {
   }
 
   const profile = await ensureCurrentProfile();
-  if (!profile) redirect("/login?next=/dashboard");
+  if (!profile) redirect("/waitlist");
   return profile;
 }
 

@@ -3,15 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "css:build": "node scripts/build-generated-css.mjs",
+    "predev": "npm run css:build",
     "dev": "NEXT_TELEMETRY_DISABLED=1 next dev --webpack",
+    "prebuild": "npm run css:build",
     "build": "NEXT_TELEMETRY_DISABLED=1 next build --webpack",
     "start": "NEXT_TELEMETRY_DISABLED=1 next start",
     "lint": "eslint app components lib types --ext .ts,.tsx",
-    "db:health": "node --env-file=.env.local scripts/db-healthcheck.mjs"
+    "db:health": "node --env-file=.env.local scripts/db-healthcheck.mjs",
+    "postinstall": "npm run css:build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.47.0",
+    "@swc/helpers": "^0.5.21",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.15.0",

@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "highpoints-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["/Users/adi/Desktop/Coding/Misc/highpoints-clone/.claude/start-dev.sh"],
       "port": 3000
     }
   ]

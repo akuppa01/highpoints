@@ -37,7 +37,7 @@ export const IntentLink = forwardRef<HTMLAnchorElement, IntentLinkProps>(
     const resolvedPrefetch = useMemo(() => {
       if (prefetch !== undefined) return prefetch;
       if (!hoverPrefetch) return undefined;
-      return warmed ? null : false;
+      return warmed;
     }, [hoverPrefetch, prefetch, warmed]);
 
     return (
